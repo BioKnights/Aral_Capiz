@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'login_screen.dart';
+import 'animated_background.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Language Game',
-      home: const LoginScreen(), // 
+
+      home: AnimatedBackground(
+        child: const LoginScreen(),
+      ),
     );
   }
 }
