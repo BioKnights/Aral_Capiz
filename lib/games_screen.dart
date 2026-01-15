@@ -1,17 +1,28 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'animated_background.dart';
 import 'game_1.dart';
 import 'game_2.dart';
+import 'leaderboard_screen.dart';
+import 'settings_screen.dart';
 
-class GamesScreen extends StatelessWidget {
-  const GamesScreen({super.key});
+class GameScreen extends StatelessWidget {
+  const GameScreen({super.key});
 
-  // ⭐ Leaderboard data (sample pa)
-  final List<Map<String, dynamic>> leaderboard = const [
-    {"name": "Juan", "score": 95},
-    {"name": "Maria", "score": 90},
-    {"name": "Pedro", "score": 85},
-  ];
+  void _playCasual(BuildContext context) {
+    final random = Random();
+    final screens = [
+      const GameOne(),
+      const GameTwo(),
+    ];
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => screens[random.nextInt(screens.length)],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,112 +31,185 @@ class GamesScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
 
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: const Text(
-            "Games",
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text("Play Game"),
+          backgroundColor: Colors.black54,
+          actions: [
+
+            // 🏆 LEADERBOARD
+            IconButton(
+              icon: const Icon(Icons.leaderboard),
+              tooltip: "Leaderboard",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LeaderboardScreen(),
+                  ),
+                );
+              },
+            ),
+
+            // ⚙️ SETTINGS
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: "Settings",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
 
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+        body: Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            width: 720,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
 
-              const Text(
-                "Choose a Game",
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                const Text(
+                  "Choose a Game Mode",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 30),
 
-              // 🎮 GAME BUTTONS
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const GameOne()),
-                  );
-                },
-                child: const Text("Game 1: Translate"),
-              ),
+                // 🎮 THREE GAME OPTIONS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
 
-              const SizedBox(height: 12),
+                    // 🎲 CASUAL
+                    _GameCard(
+                      icon: Icons.shuffle,
+                      title: "CASUAL",
+                      subtitle: "Random Games",
+                      color: Colors.orange,
+                      onTap: () => _playCasual(context),
+                    ),
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const GameTwo()),
-                  );
-                },
-                child: const Text("Game 2: Guess the Word"),
-              ),
+                    // 🎯 GAME 1
+                    _GameCard(
+                      icon: Icons.filter_1,
+                      title: "GAME 1",
+                      subtitle: "Matching Game",
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const GameOne(),
+                          ),
+                        );
+                      },
+                    ),
 
-              const SizedBox(height: 30),
-
-              // 🏆 LEADERBOARD TITLE
-              const Text(
-                "🏆 Leaderboard",
-                style: TextStyle(
-                  fontSize: 26,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                    // 🎯 GAME 2
+                    _GameCard(
+                      icon: Icons.filter_2,
+                      title: "GAME 2",
+                      subtitle: "Quiz Challenge",
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const GameTwo(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // 📋 SCROLLABLE LIST
-              Expanded(
-                child: ListView.builder(
-                  itemCount: leaderboard.length,
-                  itemBuilder: (context, index) {
-                    final player = leaderboard[index];
-
-                    return Card(
-                      color: const Color(0xFF3C6E71),
-                      child: ListTile(
-                        leading: Text(
-                          "${index + 1}",
-                          style: const TextStyle(
-                            fontSize: 22,
-                            color: Colors.white,
-                          ),
-                        ),
-                        title: Text(
-                          player["name"],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                        trailing: Text(
-                          "Score: ${player["score"]}",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.yellow,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------
+// GAME CARD BUTTON
+// --------------------------------------------------
+
+class _GameCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _GameCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Container(
+        width: 180,
+        height: 210,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            Icon(icon, size: 52, color: Colors.white),
+            const SizedBox(height: 16),
+
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

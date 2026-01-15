@@ -1,5 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'animated_background.dart';
+import 'package:language_game/services/leaderboard_service.dart';
+import 'package:language_game/services/user_session.dart';
 
 class GameTwo extends StatefulWidget {
   const GameTwo({super.key});
@@ -11,57 +14,21 @@ class GameTwo extends StatefulWidget {
 class _GameTwoState extends State<GameTwo> {
   final Random _random = Random();
 
-  // ✅ 50 English → Hiligaynon words
+  static const int maxRounds = 6;
+
   final Map<String, String> words = {
-    "Milk": "gatas",
-    "Soap": "sabon",
-    "Food": "kaon",
-    "Fish": "isda",
-    "Water": "tubig",
-    "House": "balay",
-    "Child": "bata",
-    "Light": "ilaw",
-    "Rain": "ulan",
-    "Sun": "adlaw",
-    "Rice": "bugas",
-    "Pig": "baboy",
-    "Chicken": "manok",
-    "Banana": "saging",
-    "Coffee": "kape",
-    "Bread": "tinapay",
-    "Money": "kwarta",
-    "Shoes": "sapatos",
-    "Book": "libro",
-    "Pencil": "lapis",
-    "Dog": "ido",
-    "Cat": "kuring",
-    "Tree": "kahoy",
-    "Road": "dalan",
-    "Mountain": "bukid",
-    "Sea": "dagat",
-    "Wind": "hangin",
-    "Fire": "kalayo",
-    "Egg": "itlog",
-    "Salt": "asin",
-    "Sugar": "asukar",
-    "Knife": "kutsilyo",
-    "Plate": "pinggan",
-    "Chair": "bangko",
-    "Table": "lamisa",
-    "Door": "pwertahan",
-    "Window": "bintana",
-    "Clock": "relohiyo",
-    "Phone": "selpon",
-    "Teacher": "maestro",
-    "Student": "estudyante",
-    "Friend": "abyan",
-    "Mother": "iloy",
-    "Father": "tatay",
-    "Brother": "utod nga lalaki",
-    "Sister": "utod nga babayi",
-    "Market": "merkado",
-    "Hospital": "ospital",
-    "School": "eskwelahan",
+    "House": "Balay",
+    "Eye glasses": "Antipara",
+    "Snack time": "Pamahaw",
+    "Good morning": "Maayong aga",
+    "Good afternoon": "Maayong udto",
+    "Glass/Mirror": "Espiyo",
+    "Spy": "Espiya",
+    "Chair": "Bangko",
+    "Table": "Lamesa",
+    "Bed": "Higdaan",
+    "Pillow": "Unlan",
+    "Pillow case": "Punda"
   };
 
   late List<String> englishList;
@@ -70,10 +37,23 @@ class _GameTwoState extends State<GameTwo> {
   bool answered = false;
   String? selectedAnswer;
 
+  // 🔥 prevent double save
+  bool saved = false;
+
   @override
   void initState() {
     super.initState();
+    restartGame();
+  }
+
+  void restartGame() {
     englishList = words.keys.toList()..shuffle();
+    currentIndex = 0;
+    score = 0;
+    answered = false;
+    selectedAnswer = null;
+    saved = false;
+    setState(() {});
   }
 
   List<String> getOptions() {
@@ -89,164 +69,160 @@ class _GameTwoState extends State<GameTwo> {
     return options.toList()..shuffle();
   }
 
+  Color getButtonColor(String option) {
+    if (!answered) return Colors.blue;
+    if (option == words[englishList[currentIndex]]) return Colors.green;
+    if (option == selectedAnswer) return Colors.red;
+    return Colors.grey;
+  }
+
   void selectAnswer(String answer) {
     if (answered) return;
 
-    setState(() {
-      answered = true;
-      selectedAnswer = answer;
-      if (answer == words[englishList[currentIndex]]) {
-        score++;
-      }
-    });
+    answered = true;
+    selectedAnswer = answer;
+
+    if (answer == words[englishList[currentIndex]]) {
+      score++;
+    }
+
+    setState(() {});
 
     Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        answered = false;
-        selectedAnswer = null;
-        currentIndex++;
-      });
-    });
-  }
-
-  void restartGame() {
-    setState(() {
-      englishList.shuffle();
-      currentIndex = 0;
-      score = 0;
+      currentIndex++;
       answered = false;
       selectedAnswer = null;
+      setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final total = englishList.length;
+    if (currentIndex >= maxRounds) {
+      // ✅ SAVE TO QUIZ LEADERBOARD (ONCE ONLY)
+      if (!saved) {
+        saved = true;
+        LeaderboardService.saveScore(
+          "quiz_leaderboard",
+          UserSession.displayName ?? "Guest",
+          score,
+        );
+      }
 
-    if (currentIndex >= total) {
-      return Scaffold(
-        backgroundColor: Colors.teal,
-        appBar: AppBar(
-          backgroundColor: Colors.teal.shade700,
-          title: const Text("Game 2 Result"),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "🎉 Game Complete!",
-                style: TextStyle(
-                  fontSize: 32,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+      return AnimatedBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.black54,
+            title: const Text("Round Complete"),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+
+                const Text(
+                  "🎉 Round Finished!",
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Score: $score / $total",
-                style: const TextStyle(
-                  fontSize: 26,
-                  color: Colors.white,
+
+                const SizedBox(height: 20),
+
+                Text(
+                  "Score: $score / $maxRounds",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: restartGame,
-                child: const Text("PLAY AGAIN"),
-              ),
-            ],
+
+                const SizedBox(height: 40),
+
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.replay),
+                  label: const Text("TRY AGAIN"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 14,
+                    ),
+                  ),
+                  onPressed: restartGame,
+                ),
+
+                const SizedBox(height: 15),
+
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text("NEXT LEVEL"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 14,
+                    ),
+                  ),
+                  onPressed: restartGame,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     final options = getOptions();
-    final correctAnswer = words[englishList[currentIndex]]!;
 
-    return Scaffold(
-      backgroundColor: Colors.teal,
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade700,
-        title: Text("Question ${currentIndex + 1} / $total"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-
-            // ✅ Progress bar
-            LinearProgressIndicator(
-              value: (currentIndex + 1) / total,
-              backgroundColor: Colors.white24,
-              color: Colors.yellow,
-            ),
-
-            const SizedBox(height: 30),
-
-            Text(
-              "Score: $score",
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.white,
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.black54,
+          title: const Text("Game 2"),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Text(
+                "${currentIndex + 1} / $maxRounds",
+                style: const TextStyle(color: Colors.white),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 15),
 
-            const Text(
-              "What is the Hiligaynon word for",
-              style: TextStyle(
-                fontSize: 22,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            Text(
-              englishList[currentIndex],
-              style: const TextStyle(
-                fontSize: 40,
-                color: Colors.yellow,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            ...options.map((option) {
-              Color buttonColor = Colors.white;
-
-              if (answered) {
-                if (option == correctAnswer) {
-                  buttonColor = Colors.green;
-                } else if (option == selectedAnswer) {
-                  buttonColor = Colors.red;
-                }
-              }
-
-              return Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  onPressed: () => selectAnswer(option),
-                  child: Text(
-                    option.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              Text(
+                englishList[currentIndex],
+                style: const TextStyle(
+                  fontSize: 40,
+                  color: Colors.yellow,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            }),
-          ],
+              ),
+
+              const SizedBox(height: 30),
+
+              ...options.map((option) {
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: getButtonColor(option),
+                    ),
+                    onPressed:
+                        answered ? null : () => selectAnswer(option),
+                    child: Text(option),
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

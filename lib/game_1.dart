@@ -1,5 +1,24 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'animated_background.dart';
+import 'package:language_game/services/leaderboard_service.dart';
+import 'package:language_game/services/user_session.dart';
+
+class FlipCardModel {
+  final String text;
+  final String pairId;
+  bool isFlipped;
+  bool isMatched;
+
+  FlipCardModel({
+    required this.text,
+    required this.pairId,
+    this.isFlipped = false,
+    this.isMatched = false,
+  });
+}
 
 class GameOne extends StatefulWidget {
   const GameOne({super.key});
@@ -12,265 +31,290 @@ class _GameOneState extends State<GameOne> {
   final Random _random = Random();
 
   final Map<String, String> allWords = {
-    "Eat": "Kaon",
-    "Drink": "Inom",
-    "Sleep": "Tulog",
-    "Run": "Dalagan",
-    "Happy": "Kasadya",
-    "Sad": "Kasugdan",
-    "Big": "Daku",
-    "Small": "Diutay",
-    "Fast": "Dasig",
-    "Slow": "Hinay",
-    "Hot": "Init",
-    "Cold": "Tugnaw",
-    "Good": "Maayo",
-    "Bad": "Malaut",
-    "Day": "Adlaw",
-    "Night": "Gab-i",
+    "House": "Balay",
+    "Chair": "Bangko",
+    "Table": "Lamesa",
+    "Bed": "Higdaan",
+    "Pillow": "Unlan",
+    "Dog": "Idu",
+    "Cat": "Kuring",
     "Water": "Tubig",
     "Food": "Pagkaon",
-    "House": "Balay",
-    "Child": "Bata",
-    "Mother": "Iloy",
-    "Father": "Tatay",
-    "Friend": "Amigo",
-    "School": "Eskwela",
-    "Teacher": "Maestro",
-    "Book": "Libro",
-    "Pen": "Pluma",
-    "Paper": "Papel",
-    "Sun": "Adlaw",
-    "Moon": "Buwan",
-    "Rain": "Ulan",
-    "Dog": "Ido",
-    "Cat": "Kuring",
-    "Fish": "Isda",
-    "Rice": "Bugas",
-    "Money": "Kwarta",
-    "Road": "Dalan",
-    "Car": "Salakayan",
-    "Work": "Trabaho",
-    "Play": "Hampang",
-    "Sing": "Kanta",
-    "Dance": "Sayaw",
-    "Laugh": "Kadlag",
-    "Cry": "Hibi",
-    "Buy": "Bakal",
-    "Sell": "Baligya",
-    "Open": "Buksan",
-    "Close": "Sirhan",
-    "Go": "Kadto",
   };
 
-  late List<MapEntry<String, String>> roundWords;
-
-  String? selectedEnglish;
-  String? selectedHiligaynon;
-
-  final Set<String> matchedEnglish = {};
-  final Set<String> matchedHiligaynon = {};
+  List<FlipCardModel> cards = [];
+  FlipCardModel? firstCard;
+  bool locked = false;
 
   int score = 0;
+  int level = 1;
+
+  int timeLeft = 60;
+  Timer? timer;
+  bool paused = false;
+
+  bool gameOver = false;
+  bool gameWin = false;
+  bool showPauseMenu = false;
 
   @override
   void initState() {
     super.initState();
-    startNewRound();
+
+    // 🔒 LOCK LANDSCAPE
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    startGame(resetScore: true);
   }
 
-void startNewRound() {
-  matchedEnglish.clear();
-  matchedHiligaynon.clear();
-  selectedEnglish = null;
-  selectedHiligaynon = null;
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    timer?.cancel();
+    super.dispose();
+  }
 
-  final entries = allWords.entries.toList();
+  void startGame({bool resetScore = false}) {
+    timer?.cancel();
+    cards.clear();
 
-  entries.shuffle(_random);
+    if (resetScore) score = 0;
 
-  roundWords = entries.take(5).toList();
-  setState(() {});
-}
+    timeLeft = 60;
+    paused = false;
+    locked = false;
+    firstCard = null;
+    gameOver = false;
+    gameWin = false;
+    showPauseMenu = false;
 
+    final entries = allWords.entries.toList()..shuffle();
 
-  void checkMatch() {
-    if (selectedEnglish != null && selectedHiligaynon != null) {
-      final correct = roundWords
-          .firstWhere((e) => e.key == selectedEnglish!)
-          .value;
+    for (var e in entries) {
+      cards.add(FlipCardModel(text: e.key, pairId: e.key));
+      cards.add(FlipCardModel(text: e.value, pairId: e.key));
+    }
 
-      if (correct == selectedHiligaynon) {
-        setState(() {
-          matchedEnglish.add(selectedEnglish!);
-          matchedHiligaynon.add(selectedHiligaynon!);
-          score++;
+    cards.shuffle(_random);
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      startTimer();
+      setState(() {});
+    });
+  }
+
+  void startTimer() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (paused || showPauseMenu) return;
+
+      if (timeLeft > 0) {
+        setState(() => timeLeft--);
+      } else {
+        t.cancel();
+        setState(() => gameOver = true);
+      }
+    });
+  }
+
+  void onCardTap(FlipCardModel card) {
+    if (locked || card.isFlipped || card.isMatched || paused) return;
+
+    setState(() => card.isFlipped = true);
+
+    if (firstCard == null) {
+      firstCard = card;
+    } else {
+      locked = true;
+
+      if (firstCard!.pairId == card.pairId) {
+        firstCard!.isMatched = true;
+        card.isMatched = true;
+        score++;
+
+        if (cards.every((c) => c.isMatched)) {
+          timer?.cancel();
+          gameWin = true;
+
+          LeaderboardService.saveScore(
+            "matching_leaderboard",
+            UserSession.displayName ?? "Guest",
+            score,
+          );
+        }
+
+        firstCard = null;
+        locked = false;
+      } else {
+        Future.delayed(const Duration(milliseconds: 600), () {
+          firstCard!.isFlipped = false;
+          card.isFlipped = false;
+          firstCard = null;
+          locked = false;
+          setState(() {});
         });
       }
-
-      setState(() {
-        selectedEnglish = null;
-        selectedHiligaynon = null;
-      });
     }
+  }
+
+  Widget flipCard(FlipCardModel card) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: GestureDetector(
+        onTap: () => onCardTap(card),
+        child: Container(
+          decoration: BoxDecoration(
+            color: card.isFlipped || card.isMatched
+                ? Colors.orange.shade200
+                : Colors.grey.shade400,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: card.isFlipped || card.isMatched
+                ? Text(
+                    card.text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : const Icon(Icons.help_outline, size: 20),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget pauseMenu() {
+    return Container(
+      color: Colors.black.withOpacity(0.85),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  paused = false;
+                  showPauseMenu = false;
+                });
+              },
+              child: const Text("RESUME"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("MAIN MENU"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget gameOverScreen() {
+    return Container(
+      color: Colors.black.withOpacity(0.85),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "YOU LOSE",
+              style: TextStyle(fontSize: 32, color: Colors.red),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => startGame(resetScore: true),
+              child: const Text("RETRY"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget winScreen() {
+    return Container(
+      color: Colors.black.withOpacity(0.85),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "YOU WIN 🎉",
+              style: TextStyle(fontSize: 32, color: Colors.greenAccent),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Score: $score",
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() => level++);
+                startGame();
+              },
+              child: const Text("NEXT LEVEL"),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final englishWords = roundWords.map((e) => e.key).toList();
-    final hiligaynonWords =
-        roundWords.map((e) => e.value).toList()..shuffle();
+    final size = MediaQuery.of(context).size;
+    final crossAxisCount = size.width > 800 ? 6 : 5;
 
-    final finished = matchedEnglish.length == roundWords.length;
-
-    return Scaffold(
-      backgroundColor: Colors.deepPurple,
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple.shade700,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Game 1: Matching"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-
-            Text(
-              "Score: $score",
-              style: const TextStyle(
-                fontSize: 22,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.black54,
+          title: Text("🧠 Memory Game • Level $level"),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text("⏱ $timeLeft",
+                  style: const TextStyle(fontSize: 16)),
             ),
-
-            const SizedBox(height: 10),
-
-            const Text(
-              "Match English to Hiligaynon",
-              style: TextStyle(
-                fontSize: 26,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Expanded(
-              child: Row(
-                children: [
-
-                  // ENGLISH
-                  Expanded(
-                    child: Column(
-                      children: englishWords.map((english) {
-                        final isMatched = matchedEnglish.contains(english);
-                        final isSelected = selectedEnglish == english;
-
-                        return GestureDetector(
-                          onTap: isMatched
-                              ? null
-                              : () {
-                                  setState(() {
-                                    selectedEnglish = english;
-                                  });
-                                  checkMatch();
-                                },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: isMatched
-                                  ? Colors.green
-                                  : isSelected
-                                      ? Colors.orange
-                                      : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              english,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  const SizedBox(width: 20),
-
-                  Expanded(
-                    child: Column(
-                      children: hiligaynonWords.map((hiligaynon) {
-                        final isMatched =
-                            matchedHiligaynon.contains(hiligaynon);
-                        final isSelected =
-                            selectedHiligaynon == hiligaynon;
-
-                        return GestureDetector(
-                          onTap: isMatched
-                              ? null
-                              : () {
-                                  setState(() {
-                                    selectedHiligaynon = hiligaynon;
-                                  });
-                                  checkMatch();
-                                },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: isMatched
-                                  ? Colors.green
-                                  : isSelected
-                                      ? Colors.orange
-                                      : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              hiligaynon,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            if (finished)
-              Column(
-                children: [
-                  const Text(
-                    "🎉 Round Complete!",
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.yellow,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: startNewRound,
-                    child: const Text("Next Round"),
-                  ),
-                ],
-              ),
           ],
+        ),
+        body: Stack(
+          children: [
+            GridView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: cards.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
+                childAspectRatio: 1,
+              ),
+              itemBuilder: (_, i) => flipCard(cards[i]),
+            ),
+            if (showPauseMenu) pauseMenu(),
+            if (gameOver) gameOverScreen(),
+            if (gameWin) winScreen(),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.orange,
+          child: const Icon(Icons.pause),
+          onPressed: () {
+            setState(() {
+              paused = true;
+              showPauseMenu = true;
+            });
+          },
         ),
       ),
     );

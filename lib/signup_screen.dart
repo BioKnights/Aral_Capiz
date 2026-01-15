@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/services/auth_service.dart';
-import 'login_screen.dart';
-import 'animated_background.dart';   // ← LIVE WALLPAPER
+import 'package:language_game/services/user_session.dart';
+import 'animated_background.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -18,9 +18,9 @@ class _SignupScreenState extends State<SignupScreen> {
   String message = "";
 
   void registerUser() async {
-    final username = usernameController.text;
-    final email = emailController.text;
-    final password = passwordController.text;
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       setState(() => message = "Please complete all fields");
@@ -30,55 +30,50 @@ class _SignupScreenState extends State<SignupScreen> {
     final success =
         await AuthService.registerUser(username, email, password);
 
-    setState(() {
-      if (success) {
-        message = "Registration successful!";
-      } else {
+    if (success) {
+      // ✅ AUTO LOGIN
+      UserSession.login(username);
+
+      // ✅ GO TO HOME (NAMED ROUTE)
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      setState(() {
         message = "Registration failed!";
-      }
-    });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBackground(        // ← LIVE WALLPAPER WRAPPER
+    return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Create Account"),
-          backgroundColor: const Color(0xFF3C6E71),
+          backgroundColor: Colors.black54,
         ),
         body: Center(
           child: Container(
             width: 350,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withOpacity(0.25),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 TextField(
                   controller: usernameController,
-                  decoration: const InputDecoration(
-                    labelText: "Username",
-                  ),
+                  decoration: const InputDecoration(labelText: "Username"),
                 ),
-
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(
-                    labelText: "Email",
-                  ),
+                  decoration: const InputDecoration(labelText: "Email"),
                 ),
-
                 TextField(
                   controller: passwordController,
-                  decoration: const InputDecoration(
-                    labelText: "Password",
-                  ),
+                  decoration: const InputDecoration(labelText: "Password"),
                   obscureText: true,
                 ),
 
@@ -99,12 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextButton(
                   child: const Text("Back to Login"),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
-                      ),
-                    );
+                    Navigator.pushReplacementNamed(context, '/login');
                   },
                 ),
               ],
