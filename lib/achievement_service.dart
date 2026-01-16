@@ -13,4 +13,9 @@ class AchievementService {
   static void completeGameTwo() {
     gameTwoCompleted = true;
   }
+  
+  static void unlock(String achievement) {
+    print('Unlocked: $achievement');
+  }
+  
 }

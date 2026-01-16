@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'animated_background.dart';
-import 'login_screen.dart';
 import 'package:language_game/services/user_session.dart';
+import 'services/music_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return AnimatedBackground(
@@ -16,7 +21,52 @@ class SettingsScreen extends StatelessWidget {
           backgroundColor: Colors.black54,
         ),
         body: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
+
+            // 🎵 MUSIC SETTINGS
+            const Text(
+              "🎵 Music Settings",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+
+            SwitchListTile(
+              title: const Text(
+                "Background Music",
+                style: TextStyle(color: Colors.white),
+              ),
+              value: MusicService.isPlaying,
+              onChanged: (_) {
+                setState(() {
+                  MusicService.toggleMusic();
+                });
+              },
+            ),
+
+            const Text(
+              "Volume",
+              style: TextStyle(color: Colors.white),
+            ),
+
+            Slider(
+              min: 0,
+              max: 1,
+              divisions: 10,
+              value: MusicService.volume,
+              onChanged: (value) {
+                setState(() {
+                  MusicService.setVolume(value);
+                });
+              },
+            ),
+
+            const Divider(color: Colors.white54),
+
+            // 👤 PROFILE
             const ListTile(
               leading: Icon(Icons.person, color: Colors.white),
               title: Text(
@@ -25,6 +75,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
 
+            // 🚪 LOGOUT
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text(
@@ -34,7 +85,6 @@ class SettingsScreen extends StatelessWidget {
               onTap: () {
                 UserSession.logout();
 
-                // ✅ ALWAYS use named route
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',

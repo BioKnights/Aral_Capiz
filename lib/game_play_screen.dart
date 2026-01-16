@@ -4,6 +4,8 @@ import 'animated_background.dart';
 import 'package:language_game/utils/score_saver.dart';
 import 'package:language_game/services/leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
+import 'services/achievement_service.dart';
+
 
 enum GameType { matching, quiz }
 
@@ -38,6 +40,18 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   // ✅ AUTO SAVE EVERY ROUND / LEVEL
   Future<void> finishGame(int score) async {
     totalScore += score;
+
+    // 🏆 ACHIEVEMENTS
+AchievementService.unlock("first_play");
+
+    if (score >= 1) {
+    AchievementService.unlock("first_point");
+    }
+
+    if (score >= 5) {
+    AchievementService.unlock("brainy_kid");
+    }
+
 
     // 🔥 OFFLINE / GUEST SAVE
     await ScoreSaver.save(totalScore);

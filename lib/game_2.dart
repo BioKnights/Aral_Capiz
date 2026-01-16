@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'animated_background.dart';
 import 'package:language_game/services/leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
+import 'services/achievement_service.dart';
+
 
 class GameTwo extends StatefulWidget {
   const GameTwo({super.key});
@@ -84,6 +86,7 @@ class _GameTwoState extends State<GameTwo> {
 
     if (answer == words[englishList[currentIndex]]) {
       score++;
+      AchievementService.unlock("quiz_first_correct");
     }
 
     setState(() {});

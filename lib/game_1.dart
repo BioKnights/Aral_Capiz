@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'services/achievement_service.dart';
 import 'animated_background.dart';
 import 'package:language_game/services/leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
+import 'services/achievement_service.dart';
 
 class FlipCardModel {
   final String text;
@@ -61,7 +63,6 @@ class _GameOneState extends State<GameOne> {
   void initState() {
     super.initState();
 
-    // 🔒 LOCK LANDSCAPE
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -120,8 +121,14 @@ class _GameOneState extends State<GameOne> {
     });
   }
 
+  // ==============================
+  // 🎮 CARD TAP LOGIC + ACHIEVEMENTS
+  // ==============================
   void onCardTap(FlipCardModel card) {
     if (locked || card.isFlipped || card.isMatched || paused) return;
+
+    // 👶 First Flip
+    AchievementService.unlock("first_flip");
 
     setState(() => card.isFlipped = true);
 
@@ -135,9 +142,26 @@ class _GameOneState extends State<GameOne> {
         card.isMatched = true;
         score++;
 
+        // 🎯 First Match
+        AchievementService.unlock("first_match");
+
+        // 🔥 3 Matches
+        if (score >= 3) {
+          AchievementService.unlock("roll_3");
+        }
+
+        // 🏆 WIN GAME
         if (cards.every((c) => c.isMatched)) {
           timer?.cancel();
           gameWin = true;
+
+          AchievementService.unlock("first_win");
+
+          if (timeLeft >= 30) {
+            AchievementService.unlock("speed_win");
+          }
+
+          AchievementService.unlock("word_master");
 
           LeaderboardService.saveScore(
             "matching_leaderboard",
@@ -258,6 +282,12 @@ class _GameOneState extends State<GameOne> {
             ElevatedButton(
               onPressed: () {
                 setState(() => level++);
+
+                // 👑 LEVEL 5 ACHIEVEMENT
+                if (level >= 5) {
+                  AchievementService.unlock("level_5");
+                }
+
                 startGame();
               },
               child: const Text("NEXT LEVEL"),
@@ -297,7 +327,6 @@ class _GameOneState extends State<GameOne> {
                 crossAxisCount: crossAxisCount,
                 crossAxisSpacing: 6,
                 mainAxisSpacing: 6,
-                childAspectRatio: 1,
               ),
               itemBuilder: (_, i) => flipCard(cards[i]),
             ),

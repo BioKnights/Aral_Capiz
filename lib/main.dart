@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
 import 'animated_background.dart';
-import 'package:language_game/services/score_service.dart';
 import 'package:language_game/services/user_session.dart';
+import 'services/music_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ScoreService.initDummyScores();
-
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
+  // ✅ SAFE FOR ALL PLATFORMS
+  await MusicService.start();
 
   runApp(const MyApp());
 }
