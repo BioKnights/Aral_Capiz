@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/services/auth_service.dart';
 import 'package:language_game/services/user_session.dart';
-import 'animated_background.dart';
+import 'package:language_game/services/animated_background.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,7 +17,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
   String message = "";
 
-  void registerUser() async {
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> registerUser() async {
     final username = usernameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -31,15 +39,10 @@ class _SignupScreenState extends State<SignupScreen> {
         await AuthService.registerUser(username, email, password);
 
     if (success) {
-      // ✅ AUTO LOGIN
       UserSession.login(username);
-
-      // ✅ GO TO HOME (NAMED ROUTE)
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      setState(() {
-        message = "Registration failed!";
-      });
+      setState(() => message = "Registration failed!");
     }
   }
 
@@ -63,19 +66,13 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: usernameController,
-                  decoration: const InputDecoration(labelText: "Username"),
-                ),
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
-                ),
-                TextField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: "Password"),
-                  obscureText: true,
-                ),
+                _field("Username", usernameController,
+                    autofill: AutofillHints.username),
+                _field("Email", emailController,
+                    autofill: AutofillHints.email),
+                _field("Password", passwordController,
+                    obscure: true,
+                    autofill: AutofillHints.newPassword),
 
                 const SizedBox(height: 20),
 
@@ -84,23 +81,39 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: const Text("REGISTER"),
                 ),
 
-                const SizedBox(height: 10),
-
-                Text(
-                  message,
-                  style: const TextStyle(color: Colors.white),
-                ),
+                if (message.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(message,
+                      style: const TextStyle(color: Colors.white)),
+                ],
 
                 TextButton(
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/login'),
                   child: const Text("Back to Login"),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _field(
+    String label,
+    TextEditingController c, {
+    bool obscure = false,
+    String? autofill,
+  }) {
+    return TextField(
+      controller: c,
+      obscureText: obscure,
+      autofillHints: autofill != null ? [autofill] : null,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
       ),
     );
   }

@@ -59,8 +59,33 @@ class AchievementService {
       description: "Reach level 5",
       icon: "🎮",
     ),
+    Achievement(
+      id: "first_play",
+      title: "▶ First Play",
+      description: "Play your first game",
+      icon: "▶",
+    ),
+    Achievement(
+      id: "first_point",
+      title: "⭐ First Point",
+      description: "Score your first point",
+      icon: "⭐",
+    ),
+    Achievement(
+      id: "brainy_kid",
+      title: "🧠 Brainy Kid",
+      description: "Score 5 points in one game",
+      icon: "🧠",
+    ),
+    Achievement(
+      id: "quiz_first_correct",
+      title: "📝 Quiz Starter",
+      description: "Answer a quiz correctly",
+      icon: "📝",
+    ),
   ];
 
+  // ✅ SINGLE UNLOCK METHOD (FIXED)
   static void unlock(String id) {
     if (_unlocked.contains(id)) return;
     _unlocked.add(id);
@@ -69,5 +94,21 @@ class AchievementService {
 
   static bool isUnlocked(String id) {
     return _unlocked.contains(id);
+  }
+
+  // 🔥 GAME FLAGS (OPTIONAL)
+  static bool firstGameCompleted = false;
+  static bool gameOnePerfect = false;
+  static bool gameTwoCompleted = false;
+
+  static void completeGameOne({required bool perfect}) {
+    firstGameCompleted = true;
+    if (perfect) {
+      gameOnePerfect = true;
+    }
+  }
+
+  static void completeGameTwo() {
+    gameTwoCompleted = true;
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'animated_background.dart';
+import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/user_session.dart';
-import 'services/music_service.dart';
+import 'package:language_game/services/music_service.dart';
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,19 +35,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
+            const SizedBox(height: 10),
+
+            // 🎶 MUSIC TOGGLE
             SwitchListTile(
               title: const Text(
                 "Background Music",
                 style: TextStyle(color: Colors.white),
               ),
               value: MusicService.isPlaying,
-              onChanged: (_) {
-                setState(() {
-                  MusicService.toggleMusic();
-                });
+              onChanged: (_) async {
+                await MusicService.toggleMusic();
+                setState(() {});
               },
             ),
 
+            const SizedBox(height: 8),
+
+            // 🔊 VOLUME
             const Text(
               "Volume",
               style: TextStyle(color: Colors.white),
@@ -57,10 +63,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               max: 1,
               divisions: 10,
               value: MusicService.volume,
-              onChanged: (value) {
-                setState(() {
-                  MusicService.setVolume(value);
-                });
+              onChanged: (value) async {
+                await MusicService.setVolume(value);
+                setState(() {});
               },
             ),
 
@@ -84,7 +89,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               onTap: () {
                 UserSession.logout();
-
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',

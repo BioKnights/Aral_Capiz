@@ -1,25 +1,22 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'animated_background.dart';
-import 'game_1.dart';
-import 'game_2.dart';
-import 'leaderboard_screen.dart';
-import 'settings_screen.dart';
+import '../services/animated_background.dart';
+import 'package:language_game/screen/game_1.dart';
+import 'package:language_game/screen/game_2.dart';
+import 'package:language_game/screen/game_play_screen.dart';
+import 'package:language_game/screen/leaderboard_screen.dart';
+import 'package:language_game/screen/settings_screen.dart';
+import 'package:language_game/services/user_session.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
 
   void _playCasual(BuildContext context) {
-    final random = Random();
-    final screens = [
-      const GameOne(),
-      const GameTwo(),
-    ];
-
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => screens[random.nextInt(screens.length)],
+        builder: (_) => GamePlayScreen(
+          username: UserSession.displayName ?? "Guest",
+        ),
       ),
     );
   }
@@ -29,13 +26,10 @@ class GameScreen extends StatelessWidget {
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-
         appBar: AppBar(
           title: const Text("Play Game"),
           backgroundColor: Colors.black54,
           actions: [
-
-            // 🏆 LEADERBOARD
             IconButton(
               icon: const Icon(Icons.leaderboard),
               tooltip: "Leaderboard",
@@ -48,8 +42,6 @@ class GameScreen extends StatelessWidget {
                 );
               },
             ),
-
-            // ⚙️ SETTINGS
             IconButton(
               icon: const Icon(Icons.settings),
               tooltip: "Settings",
@@ -64,7 +56,6 @@ class GameScreen extends StatelessWidget {
             ),
           ],
         ),
-
         body: Center(
           child: Container(
             padding: const EdgeInsets.all(24),
@@ -76,7 +67,6 @@ class GameScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 const Text(
                   "Choose a Game Mode",
                   style: TextStyle(
@@ -85,15 +75,11 @@ class GameScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 30),
 
-                // 🎮 THREE GAME OPTIONS
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-
-                    // 🎲 CASUAL
                     _GameCard(
                       icon: Icons.shuffle,
                       title: "CASUAL",
@@ -101,8 +87,6 @@ class GameScreen extends StatelessWidget {
                       color: Colors.orange,
                       onTap: () => _playCasual(context),
                     ),
-
-                    // 🎯 GAME 1
                     _GameCard(
                       icon: Icons.filter_1,
                       title: "GAME 1",
@@ -117,8 +101,6 @@ class GameScreen extends StatelessWidget {
                         );
                       },
                     ),
-
-                    // 🎯 GAME 2
                     _GameCard(
                       icon: Icons.filter_2,
                       title: "GAME 2",
@@ -144,9 +126,7 @@ class GameScreen extends StatelessWidget {
   }
 }
 
-// --------------------------------------------------
-// GAME CARD BUTTON
-// --------------------------------------------------
+/* ================= GAME CARD ================= */
 
 class _GameCard extends StatelessWidget {
   final IconData icon;
@@ -186,10 +166,8 @@ class _GameCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             Icon(icon, size: 52, color: Colors.white),
             const SizedBox(height: 16),
-
             Text(
               title,
               style: const TextStyle(
@@ -198,9 +176,7 @@ class _GameCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               subtitle,
               textAlign: TextAlign.center,

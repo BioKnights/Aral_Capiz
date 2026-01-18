@@ -1,13 +1,14 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'animated_background.dart';
+import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/utils/score_saver.dart';
 import 'package:language_game/services/leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
-import 'services/achievement_service.dart';
-
+import '../services/achievement_service.dart';
 
 enum GameType { matching, quiz }
+
+/* ================= GAME PLAY SCREEN ================= */
 
 class GamePlayScreen extends StatefulWidget {
   final String username;
@@ -37,48 +38,33 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
     setState(() {});
   }
 
-  // ✅ AUTO SAVE EVERY ROUND / LEVEL
   Future<void> finishGame(int score) async {
     totalScore += score;
 
     // 🏆 ACHIEVEMENTS
-AchievementService.unlock("first_play");
+    AchievementService.unlock("first_play");
+    if (score >= 1) AchievementService.unlock("first_point");
+    if (score >= 5) AchievementService.unlock("brainy_kid");
 
-    if (score >= 1) {
-    AchievementService.unlock("first_point");
-    }
-
-    if (score >= 5) {
-    AchievementService.unlock("brainy_kid");
-    }
-
-
-    // 🔥 OFFLINE / GUEST SAVE
+    // 💾 OFFLINE SAVE
     await ScoreSaver.save(totalScore);
 
     final name = UserSession.displayName ?? widget.username;
 
-    // 🔥 CASUAL LEADERBOARD (TOTAL SCORE)
+    // 🏆 LEADERBOARDS
     LeaderboardService.saveScore(
       "casual_leaderboard",
       name,
       totalScore,
     );
 
-    // 🔥 GAME-SPECIFIC LEADERBOARD
-    if (currentGame == GameType.matching) {
-      LeaderboardService.saveScore(
-        "matching_leaderboard",
-        name,
-        score,
-      );
-    } else if (currentGame == GameType.quiz) {
-      LeaderboardService.saveScore(
-        "quiz_leaderboard",
-        name,
-        score,
-      );
-    }
+    LeaderboardService.saveScore(
+      currentGame == GameType.matching
+          ? "matching_leaderboard"
+          : "quiz_leaderboard",
+      name,
+      score,
+    );
 
     if (round >= maxRounds) {
       Navigator.pop(context);
@@ -90,16 +76,13 @@ AchievementService.unlock("first_play");
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // ✅ SAVE IF USER PRESSES BACK
       onWillPop: () async {
         await ScoreSaver.save(totalScore);
-
         LeaderboardService.saveScore(
           "casual_leaderboard",
           UserSession.displayName ?? widget.username,
           totalScore,
         );
-
         return true;
       },
       child: currentGame == GameType.matching
@@ -110,7 +93,6 @@ AchievementService.unlock("first_play");
 
   @override
   void dispose() {
-    // ✅ SAVE IF SCREEN IS DESTROYED
     ScoreSaver.save(totalScore);
     super.dispose();
   }
@@ -139,37 +121,37 @@ class _MatchingMiniGameState extends State<MatchingMiniGame> {
     "Table": "Lamesa",
     "Bed": "Higdaan",
     "Pillow": "Unlan",
-    "Pillow case": "Punda"
+    "Pillow case": "Punda",
   };
 
-  String? en, hi, wrongEn, wrongHi;
+  String? left, right, wrongL, wrongR;
   int score = 0;
 
   void check() {
-    if (en != null && hi != null) {
-      if (words[en] == hi) {
+    if (left != null && right != null) {
+      if (words[left] == right) {
         score++;
       } else {
-        wrongEn = en;
-        wrongHi = hi;
+        wrongL = left;
+        wrongR = right;
       }
-      Future.delayed(const Duration(milliseconds: 700), () {
-        en = hi = wrongEn = wrongHi = null;
+      Future.delayed(const Duration(milliseconds: 600), () {
+        left = right = wrongL = wrongR = null;
         setState(() {});
       });
     }
   }
 
-  Color color(String t) {
-    if (t == wrongEn || t == wrongHi) return Colors.red;
-    if (t == en || t == hi) return Colors.yellow;
+  Color boxColor(String t) {
+    if (t == wrongL || t == wrongR) return Colors.red;
+    if (t == left || t == right) return Colors.yellow;
     return Colors.white;
   }
 
   @override
   Widget build(BuildContext context) {
-    final e = words.keys.toList();
-    final h = words.values.toList()..shuffle();
+    final leftWords = words.keys.toList();
+    final rightWords = words.values.toList()..shuffle();
 
     return AnimatedBackground(
       child: Scaffold(
@@ -181,32 +163,21 @@ class _MatchingMiniGameState extends State<MatchingMiniGame> {
         body: Column(
           children: [
             Text("Score: $score",
-                style: const TextStyle(color: Colors.white, fontSize: 22)),
+                style:
+                    const TextStyle(color: Colors.white, fontSize: 22)),
             Expanded(
               child: Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: e
-                          .map((x) => tapBox(x, color(x), () {
-                                en = x;
-                                check();
-                                setState(() {});
-                              }))
-                          .toList(),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: h
-                          .map((x) => tapBox(x, color(x), () {
-                                hi = x;
-                                check();
-                                setState(() {});
-                              }))
-                          .toList(),
-                    ),
-                  ),
+                  _column(leftWords, (x) {
+                    left = x;
+                    check();
+                    setState(() {});
+                  }),
+                  _column(rightWords, (x) {
+                    right = x;
+                    check();
+                    setState(() {});
+                  }),
                 ],
               ),
             ),
@@ -220,15 +191,23 @@ class _MatchingMiniGameState extends State<MatchingMiniGame> {
     );
   }
 
-  Widget tapBox(String t, Color c, VoidCallback tap) {
-    return GestureDetector(
-      onTap: tap,
-      child: Container(
-        margin: const EdgeInsets.all(6),
-        padding: const EdgeInsets.all(14),
-        decoration:
-            BoxDecoration(color: c, borderRadius: BorderRadius.circular(12)),
-        child: Text(t, textAlign: TextAlign.center),
+  Widget _column(List<String> items, Function(String) tap) {
+    return Expanded(
+      child: Column(
+        children: items
+            .map((x) => GestureDetector(
+                  onTap: () => tap(x),
+                  child: Container(
+                    margin: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: boxColor(x),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(x, textAlign: TextAlign.center),
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
@@ -258,13 +237,14 @@ class _QuizMiniGameState extends State<QuizMiniGame> {
     "Table": "Lamesa",
     "Bed": "Higdaan",
     "Pillow": "Unlan",
-    "Pillow case": "Punda"
+    "Pillow case": "Punda",
   };
 
   late List<String> list;
-  int i = 0, score = 0;
+  int index = 0;
+  int score = 0;
   bool answered = false;
-  String? sel;
+  String? picked;
 
   @override
   void initState() {
@@ -274,7 +254,7 @@ class _QuizMiniGameState extends State<QuizMiniGame> {
 
   @override
   Widget build(BuildContext context) {
-    if (i >= list.length) {
+    if (index >= list.length) {
       return Center(
         child: ElevatedButton(
           onPressed: () => widget.onFinish(score),
@@ -283,10 +263,11 @@ class _QuizMiniGameState extends State<QuizMiniGame> {
       );
     }
 
-    final correct = words[list[i]]!;
-    final opts = <String>{correct};
-    while (opts.length < 4) {
-      opts.add(words.values.elementAt(_r.nextInt(words.length)));
+    final correct = words[list[index]]!;
+    final options = <String>{correct};
+    while (options.length < 4) {
+      options.add(
+          words.values.elementAt(_r.nextInt(words.length)));
     }
 
     return AnimatedBackground(
@@ -296,33 +277,47 @@ class _QuizMiniGameState extends State<QuizMiniGame> {
             AppBar(title: const Text("Quiz"), backgroundColor: Colors.black54),
         body: Column(
           children: [
-            Text(list[i],
-                style: const TextStyle(fontSize: 36, color: Colors.yellow)),
-            ...opts.map((o) => ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: !answered
-                        ? Colors.blue
-                        : o == correct
-                            ? Colors.green
-                            : o == sel
-                                ? Colors.red
-                                : Colors.grey,
-                  ),
-                  onPressed: answered
-                      ? null
-                      : () {
-                          answered = true;
-                          sel = o;
-                          if (o == correct) score++;
-                          setState(() {});
-                          Future.delayed(const Duration(seconds: 1), () {
-                            answered = false;
-                            sel = null;
-                            i++;
+            const SizedBox(height: 20),
+            Text(
+              list[index],
+              style: const TextStyle(
+                fontSize: 36,
+                color: Colors.yellow,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ...options.map((o) => Container(
+                  width: double.infinity,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: !answered
+                          ? Colors.blue
+                          : o == correct
+                              ? Colors.green
+                              : o == picked
+                                  ? Colors.red
+                                  : Colors.grey,
+                    ),
+                    onPressed: answered
+                        ? null
+                        : () {
+                            answered = true;
+                            picked = o;
+                            if (o == correct) score++;
                             setState(() {});
-                          });
-                        },
-                  child: Text(o),
+                            Future.delayed(
+                                const Duration(seconds: 1), () {
+                              answered = false;
+                              picked = null;
+                              index++;
+                              setState(() {});
+                            });
+                          },
+                    child: Text(o),
+                  ),
                 )),
           ],
         ),

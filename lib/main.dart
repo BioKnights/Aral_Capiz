@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
-import 'signup_screen.dart';
-import 'home_screen.dart';
-import 'animated_background.dart';
-import 'package:language_game/services/user_session.dart';
+
+import 'screen/login_screen.dart';
+import 'screen/signup_screen.dart';
+import 'screen/home_screen.dart';
+import 'services/animated_background.dart';
+
 import 'services/music_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ SAFE FOR ALL PLATFORMS
+  // 🔊 background music (safe, looped)
   await MusicService.start();
 
   runApp(const MyApp());
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Language Game',
+      title: 'Aral Capiz',
 
       initialRoute: '/login',
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
             AnimatedBackground(child: const SignupScreen()),
 
         '/home': (_) =>
-            AnimatedBackground(child: HomeScreen(UserSession())),
+            AnimatedBackground(child: const HomeScreen()),
       },
     );
   }

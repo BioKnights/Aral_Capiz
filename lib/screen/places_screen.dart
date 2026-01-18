@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'animated_background.dart';
+import 'package:language_game/services/animated_background.dart';
 
-class CultureScreen extends StatelessWidget {
-  const CultureScreen({super.key});
+class PlacesScreen extends StatelessWidget {
+  const PlacesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,13 +10,13 @@ class CultureScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Culture"),
+          title: const Text("Places"),
           backgroundColor: Colors.black54,
         ),
         body: const Center(
           child: Text(
-            "Culture Screen",
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            "Tourist spots here",
+            style: TextStyle(fontSize: 22, color: Colors.white),
           ),
         ),
       ),

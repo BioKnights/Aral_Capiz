@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
-import 'settings_screen.dart';
-import 'achievements_screen.dart';
-import 'codex_screen.dart';
-import 'animated_background.dart';
-import 'games_screen.dart';
-import 'profile_screen.dart';
+import 'package:language_game/screen/settings_screen.dart';
+import 'package:language_game/screen/achievements_screen.dart';
+import 'package:language_game/screen/codex_screen.dart';
+import 'package:language_game/services/animated_background.dart';
+import 'package:language_game/screen/games_screen.dart';
+import 'package:language_game/screen/profile_screen.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/services/music_service.dart';
+
 
 class HomeScreen extends StatefulWidget {
-  final UserSession userSession;
-
-  const HomeScreen(this.userSession, {super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+     MusicService.start();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!UserSession.isGuest && !UserSession.hasProfile) {
