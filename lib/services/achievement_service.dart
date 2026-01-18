@@ -1,3 +1,9 @@
+import 'package:flutter/material.dart';
+import '../widgets/achievement_popup.dart';
+
+/// =======================
+/// ACHIEVEMENT MODEL
+/// =======================
 class Achievement {
   final String id;
   final String title;
@@ -12,10 +18,13 @@ class Achievement {
   });
 }
 
+/// =======================
+/// ACHIEVEMENT SERVICE
+/// =======================
 class AchievementService {
   static final Set<String> _unlocked = {};
 
-  // 🔑 LIST OF ALL ACHIEVEMENTS
+  /// 🔑 LIST OF ALL ACHIEVEMENTS
   static final List<Achievement> allAchievements = [
     Achievement(
       id: "first_flip",
@@ -85,18 +94,47 @@ class AchievementService {
     ),
   ];
 
-  // ✅ SINGLE UNLOCK METHOD (FIXED)
-  static void unlock(String id) {
+  /// =======================
+  /// UNLOCK WITH POPUP
+  /// =======================
+  static void unlock(BuildContext context, String id,
+      {String? popupText}) {
     if (_unlocked.contains(id)) return;
     _unlocked.add(id);
-    print("🏆 Achievement unlocked: $id");
+
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
+
+    final entry = OverlayEntry(
+      builder: (_) => Positioned(
+        top: 60,
+        left: 20,
+        right: 20,
+        child: AchievementPopup(
+          text: popupText ?? "🏆 Achievement Unlocked!",
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+
+    Future.delayed(const Duration(seconds: 2), () {
+      entry.remove();
+    });
+
+    debugPrint("🏆 Achievement unlocked: $id");
   }
 
+  /// =======================
+  /// HELPERS
+  /// =======================
   static bool isUnlocked(String id) {
     return _unlocked.contains(id);
   }
 
-  // 🔥 GAME FLAGS (OPTIONAL)
+  /// =======================
+  /// GAME FLAGS (OPTIONAL)
+  /// =======================
   static bool firstGameCompleted = false;
   static bool gameOnePerfect = false;
   static bool gameTwoCompleted = false;

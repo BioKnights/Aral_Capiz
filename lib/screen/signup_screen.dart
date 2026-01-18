@@ -16,6 +16,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final passwordController = TextEditingController();
 
   String message = "";
+  bool loading = false;
 
   @override
   void dispose() {
@@ -35,14 +36,24 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    setState(() {
+      loading = true;
+      message = "";
+    });
+
     final success =
         await AuthService.registerUser(username, email, password);
+
+    if (!mounted) return;
 
     if (success) {
       UserSession.login(username);
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      setState(() => message = "Registration failed!");
+      setState(() {
+        message = "Registration failed. Try again.";
+        loading = false;
+      });
     }
   }
 
@@ -52,45 +63,61 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Create Account"),
           backgroundColor: Colors.black54,
+          title: const Text("Create Account"),
         ),
         body: Center(
           child: Container(
-            width: 350,
-            padding: const EdgeInsets.all(20),
+            width: 380,
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.25),
+              color: Colors.black.withOpacity(0.35),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _field("Username", usernameController,
-                    autofill: AutofillHints.username),
-                _field("Email", emailController,
-                    autofill: AutofillHints.email),
-                _field("Password", passwordController,
-                    obscure: true,
-                    autofill: AutofillHints.newPassword),
+                _field("Username", usernameController),
+                _field("Email", emailController),
+                _field(
+                  "Password",
+                  passwordController,
+                  obscure: true,
+                ),
 
                 const SizedBox(height: 20),
 
-                ElevatedButton(
-                  onPressed: registerUser,
-                  child: const Text("REGISTER"),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: loading ? null : registerUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: loading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : const Text("CREATE ACCOUNT"),
+                  ),
                 ),
 
                 if (message.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(message,
-                      style: const TextStyle(color: Colors.white)),
+                  const SizedBox(height: 12),
+                  Text(
+                    message,
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
                 ],
 
                 TextButton(
                   onPressed: () =>
                       Navigator.pushReplacementNamed(context, '/login'),
-                  child: const Text("Back to Login"),
+                  child: const Text(
+                    "Already have an account? Login",
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ),
               ],
             ),
@@ -102,18 +129,22 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Widget _field(
     String label,
-    TextEditingController c, {
+    TextEditingController controller, {
     bool obscure = false,
-    String? autofill,
   }) {
-    return TextField(
-      controller: c,
-      obscureText: obscure,
-      autofillHints: autofill != null ? [autofill] : null,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white70),
+          enabledBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white30),
+          ),
+        ),
       ),
     );
   }

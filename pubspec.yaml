@@ -64,6 +64,10 @@ flutter:
   assets:
     - assets/images/
     - assets/audio/bg_music.mp3
+    - assets/audio/flip.mp3
+    - assets/audio/match.mp3
+    - assets/audio/win.mp3
+
 
 
   # The following line ensures that the Material Icons font is

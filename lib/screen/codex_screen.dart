@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/animated_background.dart';
-import 'package:language_game/screen/places_screen.dart';
+import 'package:language_game/screen/tourist_spot_screen.dart';
 import 'package:language_game/screen/culture_screen.dart';
 
 class CodexScreen extends StatelessWidget {
@@ -52,10 +52,9 @@ class CodexScreen extends StatelessWidget {
                         // TODO: history screen
                       },
                     ),
-
                     _MenuCard(
                       icon: Icons.place,
-                      title: "Places",
+                      title: "Culture",
                       color: Colors.teal,
                       onTap: () {
                         Navigator.push(
@@ -66,16 +65,15 @@ class CodexScreen extends StatelessWidget {
                         );
                       },
                     ),
-
                     _MenuCard(
                       icon: Icons.theater_comedy,
-                      title: "Culture",
+                      title: "Tourist Spots Here",
                       color: Colors.orange,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CultureScreen(),
+                            builder: (_) => TouristSpotScreen(),
                           ),
                         );
                       },

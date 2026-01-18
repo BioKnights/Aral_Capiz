@@ -6,7 +6,11 @@ import 'package:language_game/services/leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
 import '../services/achievement_service.dart';
 
-enum GameType { matching, quiz }
+// 🔁 MERGED GAMES
+import '../screen/game_1.dart';
+import '../screen/game_2.dart';
+
+enum GameType { gameOne, gameTwo }
 
 /* ================= GAME PLAY SCREEN ================= */
 
@@ -32,8 +36,7 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   }
 
   void nextGame() {
-    currentGame =
-        GameType.values[_random.nextInt(GameType.values.length)];
+    currentGame = GameType.values[_random.nextInt(GameType.values.length)];
     round++;
     setState(() {});
   }
@@ -41,10 +44,12 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   Future<void> finishGame(int score) async {
     totalScore += score;
 
+    UserSession.addXp(score * 20);
+
     // 🏆 ACHIEVEMENTS
-    AchievementService.unlock("first_play");
-    if (score >= 1) AchievementService.unlock("first_point");
-    if (score >= 5) AchievementService.unlock("brainy_kid");
+    AchievementService.unlock(context, "first_play");
+    if (score >= 1) AchievementService.unlock(context, "first_point");
+    if (score >= 5) AchievementService.unlock(context, "brainy_kid");
 
     // 💾 OFFLINE SAVE
     await ScoreSaver.save(totalScore);
@@ -59,9 +64,9 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
     );
 
     LeaderboardService.saveScore(
-      currentGame == GameType.matching
+      currentGame == GameType.gameOne
           ? "matching_leaderboard"
-          : "quiz_leaderboard",
+          : "fill_blank_leaderboard",
       name,
       score,
     );
@@ -85,9 +90,13 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
         );
         return true;
       },
-      child: currentGame == GameType.matching
-          ? MatchingMiniGame(onFinish: finishGame)
-          : QuizMiniGame(onFinish: finishGame),
+      child: SafeArea(
+        child: AnimatedBackground(
+          child: currentGame == GameType.gameOne
+              ? GameOneWrapper(onFinish: finishGame)
+              : GameTwoWrapper(onFinish: finishGame),
+        ),
+      ),
     );
   }
 
@@ -98,230 +107,56 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   }
 }
 
-/* ================= MATCHING GAME ================= */
+/* ================= GAME ONE WRAPPER ================= */
 
-class MatchingMiniGame extends StatefulWidget {
+class GameOneWrapper extends StatelessWidget {
   final Function(int) onFinish;
-  const MatchingMiniGame({super.key, required this.onFinish});
-
-  @override
-  State<MatchingMiniGame> createState() => _MatchingMiniGameState();
-}
-
-class _MatchingMiniGameState extends State<MatchingMiniGame> {
-  final Map<String, String> words = {
-    "House": "Balay",
-    "Eye glasses": "Antipara",
-    "Snack time": "Pamahaw",
-    "Good morning": "Maayong aga",
-    "Good afternoon": "Maayong udto",
-    "Glass/Mirror": "Espiyo",
-    "Spy": "Espiya",
-    "Chair": "Bangko",
-    "Table": "Lamesa",
-    "Bed": "Higdaan",
-    "Pillow": "Unlan",
-    "Pillow case": "Punda",
-  };
-
-  String? left, right, wrongL, wrongR;
-  int score = 0;
-
-  void check() {
-    if (left != null && right != null) {
-      if (words[left] == right) {
-        score++;
-      } else {
-        wrongL = left;
-        wrongR = right;
-      }
-      Future.delayed(const Duration(milliseconds: 600), () {
-        left = right = wrongL = wrongR = null;
-        setState(() {});
-      });
-    }
-  }
-
-  Color boxColor(String t) {
-    if (t == wrongL || t == wrongR) return Colors.red;
-    if (t == left || t == right) return Colors.yellow;
-    return Colors.white;
-  }
+  const GameOneWrapper({super.key, required this.onFinish});
 
   @override
   Widget build(BuildContext context) {
-    final leftWords = words.keys.toList();
-    final rightWords = words.values.toList()..shuffle();
+    return Stack(
+      children: [
+        const GameOne(),
 
-    return AnimatedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text("Matching Game"),
-          backgroundColor: Colors.black54,
+        // ▶ NEXT GAME (UNIVERSAL POSITION)
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text("NEXT GAME"),
+            onPressed: () => onFinish(5), // score from GameOne logic
+          ),
         ),
-        body: Column(
-          children: [
-            Text("Score: $score",
-                style:
-                    const TextStyle(color: Colors.white, fontSize: 22)),
-            Expanded(
-              child: Row(
-                children: [
-                  _column(leftWords, (x) {
-                    left = x;
-                    check();
-                    setState(() {});
-                  }),
-                  _column(rightWords, (x) {
-                    right = x;
-                    check();
-                    setState(() {});
-                  }),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => widget.onFinish(score),
-              child: const Text("Next Game"),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _column(List<String> items, Function(String) tap) {
-    return Expanded(
-      child: Column(
-        children: items
-            .map((x) => GestureDetector(
-                  onTap: () => tap(x),
-                  child: Container(
-                    margin: const EdgeInsets.all(6),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: boxColor(x),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(x, textAlign: TextAlign.center),
-                  ),
-                ))
-            .toList(),
-      ),
+      ],
     );
   }
 }
 
-/* ================= QUIZ GAME ================= */
+/* ================= GAME TWO WRAPPER ================= */
 
-class QuizMiniGame extends StatefulWidget {
+class GameTwoWrapper extends StatelessWidget {
   final Function(int) onFinish;
-  const QuizMiniGame({super.key, required this.onFinish});
-
-  @override
-  State<QuizMiniGame> createState() => _QuizMiniGameState();
-}
-
-class _QuizMiniGameState extends State<QuizMiniGame> {
-  final Random _r = Random();
-  final Map<String, String> words = {
-    "House": "Balay",
-    "Eye glasses": "Antipara",
-    "Snack time": "Pamahaw",
-    "Good morning": "Maayong aga",
-    "Good afternoon": "Maayong udto",
-    "Glass/Mirror": "Espiyo",
-    "Spy": "Espiya",
-    "Chair": "Bangko",
-    "Table": "Lamesa",
-    "Bed": "Higdaan",
-    "Pillow": "Unlan",
-    "Pillow case": "Punda",
-  };
-
-  late List<String> list;
-  int index = 0;
-  int score = 0;
-  bool answered = false;
-  String? picked;
-
-  @override
-  void initState() {
-    super.initState();
-    list = words.keys.toList()..shuffle();
-  }
+  const GameTwoWrapper({super.key, required this.onFinish});
 
   @override
   Widget build(BuildContext context) {
-    if (index >= list.length) {
-      return Center(
-        child: ElevatedButton(
-          onPressed: () => widget.onFinish(score),
-          child: const Text("Next Game"),
-        ),
-      );
-    }
+    return Stack(
+      children: [
+        const GameTwo(),
 
-    final correct = words[list[index]]!;
-    final options = <String>{correct};
-    while (options.length < 4) {
-      options.add(
-          words.values.elementAt(_r.nextInt(words.length)));
-    }
-
-    return AnimatedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar:
-            AppBar(title: const Text("Quiz"), backgroundColor: Colors.black54),
-        body: Column(
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              list[index],
-              style: const TextStyle(
-                fontSize: 36,
-                color: Colors.yellow,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ...options.map((o) => Container(
-                  width: double.infinity,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: !answered
-                          ? Colors.blue
-                          : o == correct
-                              ? Colors.green
-                              : o == picked
-                                  ? Colors.red
-                                  : Colors.grey,
-                    ),
-                    onPressed: answered
-                        ? null
-                        : () {
-                            answered = true;
-                            picked = o;
-                            if (o == correct) score++;
-                            setState(() {});
-                            Future.delayed(
-                                const Duration(seconds: 1), () {
-                              answered = false;
-                              picked = null;
-                              index++;
-                              setState(() {});
-                            });
-                          },
-                    child: Text(o),
-                  ),
-                )),
-          ],
+        // ▶ NEXT GAME (UNIVERSAL POSITION)
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text("NEXT GAME"),
+            onPressed: () => onFinish(5), // score from GameTwo logic
+          ),
         ),
-      ),
+      ],
     );
   }
 }
