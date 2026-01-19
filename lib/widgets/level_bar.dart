@@ -6,7 +6,7 @@ class LevelBar extends StatelessWidget {
   final int currentXp;
   final int nextLevelXp;
 
-  const LevelBar({
+  LevelBar({
     super.key,
     required this.level,
     required this.progress,

@@ -29,9 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value ? MusicService.start() : MusicService.stop();
               },
             ),
-
             const Divider(),
-
             ListTile(
               leading: const Icon(Icons.info),
               title: const Text("About"),

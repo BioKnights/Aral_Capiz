@@ -5,7 +5,7 @@ class CultureCard extends StatelessWidget {
   final String imagePath;
   final VoidCallback onTap;
 
-    const CultureCard({
+  const CultureCard({
     super.key,
     required this.title,
     required this.imagePath,
