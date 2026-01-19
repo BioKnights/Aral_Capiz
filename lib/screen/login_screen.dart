@@ -67,71 +67,83 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return AnimatedBackground(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // ✅ REQUIRED
+        backgroundColor: Colors.transparent,
         body: Center(
-          child: Container(
-            width: 360,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(.30),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Login",
-                  style: TextStyle(
-                    fontSize: 26,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Container(
+              width: 360,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(.30),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 26,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                _field("Username", _user),
-                const SizedBox(height: 12),
-                _field("Password", _pass, obscure: true),
+                  _field("Username", _user),
+                  const SizedBox(height: 12),
+                  _field("Password", _pass, obscure: true),
 
-                if (_error != null) ...[
+                  if (_error != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      child: const Text(
+                        "ENTER",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 10),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.redAccent),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _goToRegister,
+                      child: const Text(
+                        "CREATE ACCOUNT",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextButton(
+                    onPressed: _guest,
+                    child: const Text(
+                      "PLAY AS GUEST",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
-
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _login,
-                    child: const Text("ENTER"),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _goToRegister,
-                    child: const Text("CREATE ACCOUNT"),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                TextButton(
-                  onPressed: _guest,
-                  child: const Text(
-                    "PLAY AS GUEST",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -155,6 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
         labelStyle: const TextStyle(color: Colors.white70),
         enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.white30),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );

@@ -56,69 +56,80 @@ class GameScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            width: 720,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Choose a Game Mode",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 30),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // 🔥 RESPONSIVE BODY
+        body: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isSmall = constraints.maxWidth < 700;
+
+              return Container(
+                padding: const EdgeInsets.all(24),
+                width: isSmall ? double.infinity : 720,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _GameCard(
-                      icon: Icons.shuffle,
-                      title: "CASUAL",
-                      subtitle: "Random Games",
-                      color: Colors.orange,
-                      onTap: () => _playCasual(context),
+                    const Text(
+                      "Choose a Game Mode",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _GameCard(
-                      icon: Icons.filter_1,
-                      title: "GAME 1",
-                      subtitle: "Matching Game",
-                      color: Colors.blue,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const GameOne(),
-                          ),
-                        );
-                      },
-                    ),
-                    _GameCard(
-                      icon: Icons.filter_2,
-                      title: "GAME 2",
-                      subtitle: "Quiz Challenge",
-                      color: Colors.green,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const GameTwo(),
-                          ),
-                        );
-                      },
+                    const SizedBox(height: 30),
+
+                    // 🔁 WRAP FOR UNIVERSAL LAYOUT
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 20,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        _GameCard(
+                          icon: Icons.shuffle,
+                          title: "CASUAL",
+                          subtitle: "Random Games",
+                          color: Colors.orange,
+                          onTap: () => _playCasual(context),
+                        ),
+                        _GameCard(
+                          icon: Icons.filter_1,
+                          title: "GAME 1",
+                          subtitle: "Matching Game",
+                          color: Colors.blue,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GameOne(),
+                              ),
+                            );
+                          },
+                        ),
+                        _GameCard(
+                          icon: Icons.filter_2,
+                          title: "GAME 2",
+                          subtitle: "Quiz Challenge",
+                          color: Colors.green,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GameTwo(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
