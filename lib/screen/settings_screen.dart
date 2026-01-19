@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/services/music_service.dart';
+import 'package:language_game/services/animated_background.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,38 +14,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            SwitchListTile(
-              title: const Text("Background Music"),
-              value: musicOn,
-              onChanged: (value) {
-                setState(() => musicOn = value);
-                value ? MusicService.start() : MusicService.stop();
-              },
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // ✅ REQUIRED
+        appBar: AppBar(
+          title: const Text("Settings"),
+          backgroundColor: Colors.black.withOpacity(0.6),
+          elevation: 0,
+        ),
+        body: Center(
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(20),
             ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text("About"),
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: "Aral Capiznon",
-                  applicationVersion: "1.0.0",
-                  children: const [
-                    Text("Learn Capiznon language through games."),
-                  ],
-                );
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SwitchListTile(
+                  title: const Text(
+                    "Background Music",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  value: musicOn,
+                  activeColor: Colors.greenAccent,
+                  onChanged: (value) {
+                    setState(() => musicOn = value);
+                    value ? MusicService.start() : MusicService.stop();
+                  },
+                ),
+
+                const Divider(color: Colors.white30),
+
+                ListTile(
+                  leading: const Icon(Icons.info, color: Colors.white),
+                  title: const Text(
+                    "About",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: "Aral Capiznon",
+                      applicationVersion: "1.0.0",
+                      children: const [
+                        Text("Learn Capiznon language through games."),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -36,18 +36,13 @@ class _MascotWidgetState extends State<MascotWidget>
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    _scale = Tween<double>(begin: 0.95, end: 1.05).animate(
+    _scale = Tween<double>(begin: 0.95, end: 1.08).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    _float = Tween<double>(begin: -6, end: 6).animate(
+    _float = Tween<double>(begin: -8, end: 8).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-
-    // 🔁 OPTIONAL: auto-randomize text every 6 seconds
-    // Timer.periodic(const Duration(seconds: 6), (_) {
-    //   _randomizeText();
-    // });
   }
 
   void _randomizeText() {
@@ -64,6 +59,14 @@ class _MascotWidgetState extends State<MascotWidget>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    /// 🔥 Responsive mascot size
+    final mascotSize = size.width < 360 ? 150.0 : 200.0;
+
+    /// 💭 Responsive bubble width
+    final bubbleWidth = size.width < 360 ? 240.0 : 280.0;
+
     return GestureDetector(
       onTap: _randomizeText,
       child: AnimatedBuilder(
@@ -82,20 +85,20 @@ class _MascotWidgetState extends State<MascotWidget>
           children: [
             /// 💭 THINKING BALLOON
             Container(
-              margin: const EdgeInsets.only(bottom: 6),
+              margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
+                horizontal: 18,
+                vertical: 14,
               ),
-              constraints: const BoxConstraints(maxWidth: 220),
+              constraints: BoxConstraints(maxWidth: bubbleWidth),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
@@ -103,7 +106,7 @@ class _MascotWidgetState extends State<MascotWidget>
                 _currentTip,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),
@@ -112,14 +115,14 @@ class _MascotWidgetState extends State<MascotWidget>
 
             /// 🔻 BALLOON TAIL
             CustomPaint(
-              size: const Size(20, 10),
+              size: const Size(24, 12),
               painter: _BubbleTailPainter(),
             ),
 
-            /// 🦀 MASCOT
+            /// 🦀 BIG MASCOT
             Image.asset(
               "assets/images/ali_crab.png",
-              height: 120,
+              height: mascotSize,
               fit: BoxFit.contain,
             ),
           ],

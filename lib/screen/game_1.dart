@@ -140,34 +140,36 @@ class _GameOneState extends State<GameOne> {
 
   lock = true;
 
-  if (first!.pair == c.pair) {
-    playSound('audio/match.mp3');
-    AchievementService.unlock(context, "first_match");
+if (first!.pair == c.pair) {
+  playSound('audio/match.mp3');
+  AchievementService.unlock(context, "first_match");
 
-    first!.matched = true;
-    c.matched = true;
-    score++;
+  first!.matched = true;
+  c.matched = true;
 
-    if (cards.every((x) => x.matched)) {
-      win = true;
-      timer?.cancel();
+  score++;
 
-      playSound('audio/win.mp3');
-      AchievementService.unlock(context, "stage_clear");
+  // ✅ ADD XP (OFFLINE SAFE)
+  UserSession.addXp(10);
 
-      LeaderboardService.saveScore(
-        "matching_leaderboard",
-        UserSession.displayName ?? "Guest",
-        score,
-      );
+  if (cards.every((x) => x.matched)) {
+    win = true;
+    timer?.cancel();
 
-      UserSession.addXp(score * 20);
-    }
+    playSound('audio/win.mp3');
+    AchievementService.unlock(context, "stage_clear");
 
-    first = null;
-    lock = false;
-    setState(() {});
-  } else {
+    LeaderboardService.saveScore(
+      "matching_leaderboard",
+      UserSession.displayName ?? "Guest",
+      score,
+    );
+  }
+
+  first = null;
+  lock = false;
+  setState(() {});
+} else {
     Future.delayed(const Duration(milliseconds: 700), () {
       first!.flipped = false;
       c.flipped = false;
@@ -248,16 +250,33 @@ class _GameOneState extends State<GameOne> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.black54,
-            title: Text("🧠 Memory • Stage $level"),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text("⏱ $time"),
-              ),
-            ],
+appBar: AppBar(
+  backgroundColor: Colors.black54,
+  title: const Text("🧠 Memory Game"),
+  actions: [
+    // ⭐ LIVE LEVEL
+    ValueListenableBuilder<int>(
+      valueListenable: UserSession.levelNotifier,
+      builder: (_, level, __) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Center(
+            child: Text(
+              "Level $level",
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
+        );
+      },
+    ),
+
+    Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Center(child: Text("⏱ $time")),
+    ),
+  ],
+),
+
           body: Stack(
             children: [
               AbsorbPointer(

@@ -110,14 +110,29 @@ class _HomeScreenState extends State<HomeScreen> {
     final nextLevelXp = UserSession.xpNeeded;
     final progress = currentXp / nextLevelXp;
 
-    return LevelBar(
-      level: level,
-      progress: progress,
-      currentXp: currentXp,
-      nextLevelXp: nextLevelXp,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Level $level",
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        LevelBar(
+          level: level,
+          progress: progress,
+          currentXp: currentXp,
+          nextLevelXp: nextLevelXp,
+        ),
+      ], // ✅ REQUIRED
     );
   },
 ),
+
 
                 ],
               ),

@@ -4,12 +4,15 @@ import 'screen/login_screen.dart';
 import 'screen/signup_screen.dart';
 import 'screen/home_screen.dart';
 import 'services/music_service.dart';
+import 'services/user_session.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await MusicService.init();
+  await UserSession.load(); // ✅ LOAD SAVED XP
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

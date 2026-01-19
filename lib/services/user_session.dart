@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserSession {
   // 🔔 XP NOTIFIER (FOR LIVE UI UPDATES)
   static final ValueNotifier<int> xpNotifier = ValueNotifier<int>(0);
+  static final ValueNotifier<int> levelNotifier = ValueNotifier<int>(1);
 
   static bool isGuest = true;
   static String? displayName;
@@ -13,6 +14,10 @@ class UserSession {
   static int xp = 0;
   static int gamesPlayed = 0;
   static int totalScore = 0;
+
+  // 🔔 LEVEL NOTIFIER (FOR LIVE UI UPDATES)
+
+
 
   // 🎯 XP REQUIRED PER LEVEL
   static int get xpNeeded => level * 100;
@@ -30,6 +35,8 @@ class UserSession {
 
     // 🔔 SYNC NOTIFIER AFTER LOAD
     xpNotifier.value = xp;
+    levelNotifier.value = level;
+
   }
 
   static Future<void> save() async {

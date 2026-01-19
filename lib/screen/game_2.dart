@@ -104,10 +104,14 @@ class _GameTwoState extends State<GameTwo> {
     final answer = questions[index]["answer"];
     correct = selectedWord == answer;
 
-    if (correct) {
-      score++;
-      AchievementService.unlock(context, "fill_blank_correct");
-    }
+if (correct) {
+  score++;
+  AchievementService.unlock(context, "fill_blank_correct");
+
+  // ✅ ADD XP (OFFLINE SAFE)
+  UserSession.addXp(10);
+}
+
 
     await playSound("audio/flip.mp3");
 
