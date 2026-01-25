@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:language_game/screen/splash_screen.dart';
 import 'screen/login_screen.dart';
 import 'screen/signup_screen.dart';
 import 'screen/home_screen.dart';
 import 'services/music_service.dart';
-import 'services/user_session.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔒 LOCK ORIENTATION TO PORTRAIT ONLY
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
   await MusicService.init();
-  await UserSession.load(); // ✅ LOAD SAVED XP
   runApp(const MyApp());
 }
 

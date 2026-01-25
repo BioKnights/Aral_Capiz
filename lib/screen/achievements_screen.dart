@@ -8,10 +8,9 @@ class AchievementsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final achievements = AchievementService.allAchievements;
-    final size = MediaQuery.of(context).size;
 
     // 📱 Responsive columns
-    final int columns = size.width > 700 ? 2 : 1;
+    final int columns = 1;
 
     return AnimatedBackground(
       child: Scaffold(

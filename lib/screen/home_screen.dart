@@ -206,12 +206,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 🧠 MAIN CONTENT
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // 🦀 MASCOT (CENTER)
-                  Expanded(
-                    flex: 4,
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.45,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final mascotSize = constraints.maxWidth * 0.70;
@@ -226,50 +227,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   // 🎮 RIGHT MENU
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        HoverIconButton(
-                          icon: Icons.emoji_events,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    const AchievementsScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 25),
-                        HoverIconButton(
-                          icon: Icons.menu_book,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CodexScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 25),
-                        HoverIconButton(
-                          icon: Icons.videogame_asset,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const GameScreen(),
-                              ),
-                            ).then((_) => setState(() {})); // 🔥 refresh XP
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+const SizedBox(height: 30),
+
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    HoverIconButton(
+      icon: Icons.emoji_events,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AchievementsScreen(),
+          ),
+        );
+      },
+    ),
+    HoverIconButton(
+      icon: Icons.menu_book,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const CodexScreen(),
+          ),
+        );
+      },
+    ),
+    HoverIconButton(
+      icon: Icons.videogame_asset,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const GameScreen(),
+          ),
+        ).then((_) => setState(() {}));
+      },
+    ),
+  ],
+),
+
                 ],
               ),
             ),

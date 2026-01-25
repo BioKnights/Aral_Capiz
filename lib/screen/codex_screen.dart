@@ -8,8 +8,6 @@ class CodexScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isWide = size.width > 600; // tablet / desktop check
 
     return AnimatedBackground(
       child: Scaffold(
@@ -39,7 +37,7 @@ class CodexScreen extends StatelessWidget {
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: isWide ? 3 : 2,
+                  crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.1,
