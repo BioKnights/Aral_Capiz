@@ -1,58 +1,53 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 class AuthService {
+  // 🧠 Simple in-memory user storage
+  static final Map<String, Map<String, dynamic>> _users = {};
 
-  // 👉 CHANGE THIS depending on device:
-  // Windows desktop:
-  // static const String baseUrl = "http://127.0.0.1/language_game_api";
-  //
-  // Android Emulator:
-  // static const String baseUrl = "http://10.0.2.2/language_game_api";
+  static String? _currentUserEmail;
 
-  static const String baseUrl = "http://localhost/language_game_api";
-  // ← use emulator
+  /// REGISTER
+  static Future<bool> registerUser(
+    String username,
+    String email,
+    String password,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 300)); // fake delay
 
-  static Future<bool> registerUser(String username, String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/register.php"),
-        body: {
-          "username": username,
-          "email": email,
-          "password": password,
-        },
-      );
-
-      print("REGISTER RESPONSE: ${response.body}");
-
-      final data = jsonDecode(response.body);
-
-      return data["status"] == "success";
-    } catch (e) {
-      print("REGISTER ERROR: $e");
+    // ❌ Email already exists
+    if (_users.containsKey(email)) {
       return false;
     }
+
+    _users[email] = {
+      'username': username,
+      'email': email,
+      'password': password, // ⚠️ plaintext (OK for offline demo)
+      'xp': 0,
+      'createdAt': DateTime.now(),
+    };
+
+    _currentUserEmail = email;
+    return true;
   }
 
-  static Future<bool> loginUser(String username, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/login.php"),
-        body: {
-          "username": username,
-          "password": password,
-        },
-      );
+  /// LOGIN
+  static Future<bool> loginUser(String email, String password) async {
+    await Future.delayed(const Duration(milliseconds: 300)); // fake delay
 
-      print("LOGIN RESPONSE: ${response.body}");
+    if (!_users.containsKey(email)) return false;
+    if (_users[email]!['password'] != password) return false;
 
-      final data = jsonDecode(response.body);
+    _currentUserEmail = email;
+    return true;
+  }
 
-      return data["status"] == "success";
-    } catch (e) {
-      print("LOGIN ERROR: $e");
-      return false;
-    }
+  /// LOGOUT
+  static void logout() {
+    _currentUserEmail = null;
+  }
+
+  /// CURRENT USER
+  static Map<String, dynamic>? get currentUser {
+    if (_currentUserEmail == null) return null;
+    return _users[_currentUserEmail];
   }
 }

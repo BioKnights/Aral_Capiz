@@ -22,9 +22,11 @@ class Achievement {
 /// ACHIEVEMENT SERVICE
 /// =======================
 class AchievementService {
-  static final Set<String> _unlocked = {};
 
-  /// 🔑 LIST OF ALL ACHIEVEMENTS
+  static final Set<String> _unlocked = {};
+  static int _exp = 0;
+
+  /// 🔑 ALL ACHIEVEMENTS
   static final List<Achievement> allAchievements = [
     Achievement(
       id: "first_flip",
@@ -39,69 +41,39 @@ class AchievementService {
       icon: "🎯",
     ),
     Achievement(
-      id: "roll_3",
-      title: "🔥 On a Roll",
-      description: "Get 3 correct matches",
-      icon: "🔥",
-    ),
-    Achievement(
       id: "first_win",
       title: "🏆 Beginner Champ",
       description: "Win your first game",
       icon: "🏆",
     ),
     Achievement(
-      id: "speed_win",
+      id: "speed_runner",
       title: "⏱ Speed Runner",
-      description: "Win with 30 seconds left",
+      description: "Reach level 5 fast",
       icon: "⏱",
-    ),
-    Achievement(
-      id: "word_master",
-      title: "📚 Word Master",
-      description: "Match all word pairs",
-      icon: "📚",
-    ),
-    Achievement(
-      id: "level_5",
-      title: "🎮 Gamer Level 5",
-      description: "Reach level 5",
-      icon: "🎮",
-    ),
-    Achievement(
-      id: "first_play",
-      title: "▶ First Play",
-      description: "Play your first game",
-      icon: "▶",
-    ),
-    Achievement(
-      id: "first_point",
-      title: "⭐ First Point",
-      description: "Score your first point",
-      icon: "⭐",
     ),
     Achievement(
       id: "brainy_kid",
       title: "🧠 Brainy Kid",
-      description: "Score 5 points in one game",
+      description: "Score 5 points",
       icon: "🧠",
-    ),
-    Achievement(
-      id: "quiz_first_correct",
-      title: "📝 Quiz Starter",
-      description: "Answer a quiz correctly",
-      icon: "📝",
     ),
   ];
 
   /// =======================
-  /// UNLOCK WITH POPUP
+  /// UNLOCK
   /// =======================
-  static void unlock(BuildContext context, String id,
-      {String? popupText}) {
+  static void unlock(String id) {
     if (_unlocked.contains(id)) return;
-    _unlocked.add(id);
 
+    _unlocked.add(id);
+    debugPrint("🏆 Achievement unlocked: $id");
+  }
+
+  /// =======================
+  /// POPUP (OVERLAY STYLE)
+  /// =======================
+  static void showPopup(BuildContext context, {String? text}) {
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
 
@@ -111,7 +83,7 @@ class AchievementService {
         left: 20,
         right: 20,
         child: AchievementPopup(
-          text: popupText ?? "🏆 Achievement Unlocked!",
+          text: text ?? "🏆 Achievement Unlocked!",
         ),
       ),
     );
@@ -121,32 +93,22 @@ class AchievementService {
     Future.delayed(const Duration(seconds: 2), () {
       entry.remove();
     });
-
-    debugPrint("🏆 Achievement unlocked: $id");
   }
+
+  /// =======================
+  /// EXP SYSTEM
+  /// =======================
+  static void addExp(int amount) {
+    _exp += amount;
+    debugPrint("📈 EXP +$amount | Total: $_exp");
+  }
+
+  static int get exp => _exp;
 
   /// =======================
   /// HELPERS
   /// =======================
   static bool isUnlocked(String id) {
     return _unlocked.contains(id);
-  }
-
-  /// =======================
-  /// GAME FLAGS (OPTIONAL)
-  /// =======================
-  static bool firstGameCompleted = false;
-  static bool gameOnePerfect = false;
-  static bool gameTwoCompleted = false;
-
-  static void completeGameOne({required bool perfect}) {
-    firstGameCompleted = true;
-    if (perfect) {
-      gameOnePerfect = true;
-    }
-  }
-
-  static void completeGameTwo() {
-    gameTwoCompleted = true;
   }
 }

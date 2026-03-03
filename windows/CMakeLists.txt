@@ -1,5 +1,11 @@
 # Project-level configuration.
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # Force MSVC to use C++17 (required for std::variant)
+if (MSVC)
+  add_compile_options(/std:c++17)
+endif()
 project(language_game LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change

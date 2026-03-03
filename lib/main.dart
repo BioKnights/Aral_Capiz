@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:language_game/screen/splash_screen.dart';
-import 'screen/login_screen.dart';
-import 'screen/signup_screen.dart';
-import 'screen/home_screen.dart';
+import 'package:language_game/screen/home/splash_screen.dart';
+import 'package:language_game/screen/home/login_screen.dart';
+import 'package:language_game/screen/home/signup_screen.dart';
+import 'package:language_game/screen/home/home_screen.dart';
 import 'services/music_service.dart';
 
 void main() async {
@@ -17,7 +17,6 @@ void main() async {
   await MusicService.init();
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,7 +34,6 @@ class MyApp extends StatelessWidget {
           bodyLarge: TextStyle(color: Colors.white),
           bodyMedium: TextStyle(color: Colors.white),
           bodySmall: TextStyle(color: Colors.white70),
-
           titleLarge: TextStyle(color: Colors.white),
           titleMedium: TextStyle(color: Colors.white),
           titleSmall: TextStyle(color: Colors.white70),
@@ -65,10 +63,10 @@ class MyApp extends StatelessWidget {
 
       initialRoute: '/',
       routes: {
-        '/': (_) => const SplashScreen(),
-        '/login': (_) => const LoginScreen(),
-        '/signup': (_) => const SignupScreen(),
-        '/home': (_) => const HomeScreen(),
+        '/': (_) => SplashScreen(),
+        '/login': (_) => LoginScreen(),
+        '/signup': (_) => SignupScreen(),
+        '/home': (_) => HomeScreen(),
       },
     );
   }
