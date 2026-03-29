@@ -22,7 +22,6 @@ class CathedralScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                // 🖼 Image (Responsive)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(18),
                   child: Image.asset(
@@ -35,7 +34,6 @@ class CathedralScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // 🏛 Title
                 const Text(
                   "Roxas City Metropolitan Cathedral",
                   style: TextStyle(

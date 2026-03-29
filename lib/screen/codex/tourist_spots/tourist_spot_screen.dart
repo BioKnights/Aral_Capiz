@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/tourist_spots/ivisan/ivisan.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/screen/codex/tourist_spots/roxas_city/roxas_city_screen.dart';
 import 'package:language_game/services/animated_background.dart';
@@ -49,9 +50,7 @@ class TouristSpotScreen extends StatelessWidget {
               return CultureCard(
                 title: item.title,
                 imagePath: item.image,
-                onTap: item.onTap != null
-                    ? () => item.onTap!(context)
-                    : () {},
+                onTap: item.onTap != null ? () => item.onTap!(context) : () {},
               );
             },
           ),
@@ -95,6 +94,12 @@ final List<_CultureItem> _cultureItems = [
   _CultureItem(
     title: "Ivisan",
     image: "assets/images/roxas_cathedral.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const Ivisan()),
+      );
+    },
   ),
   _CultureItem(
     title: "Pontevedra",

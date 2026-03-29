@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/utils/score_saver.dart';
-import 'package:language_game/services/leaderboard_service.dart';
+import 'package:language_game/services/firebase_leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/achievement_service.dart';
 import 'package:language_game/screen/Games/game_1.dart';
@@ -27,6 +27,8 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   final int maxRounds = 5;
   late GameType currentGame;
 
+  bool isGameFinished = false; // ⭐ CONTROL
+
   @override
   void initState() {
     super.initState();
@@ -36,33 +38,34 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
   void nextGame() {
     currentGame = GameType.values[_random.nextInt(GameType.values.length)];
     round++;
+    isGameFinished = false;
     setState(() {});
   }
 
   Future<void> finishGame(int score) async {
     totalScore += score;
+    isGameFinished = true;
 
     UserSession.addXp(score * 20);
 
     // 🏆 ACHIEVEMENTS
-AchievementService.unlock("first_play");
-  if (score >= 1) AchievementService.unlock("first_point");
-  if (score >= 5) AchievementService.unlock("brainy_kid");
+    AchievementService.unlock(context, "first_match");
+    if (score >= 1) AchievementService.unlock(context, "first_flip");
+    if (score >= 5) AchievementService.unlock(context, "brainy_kid");
 
-
-    // 💾 OFFLINE SAVE
+    // 💾 SAVE
     await ScoreSaver.save(totalScore);
 
     final name = UserSession.displayName ?? widget.username;
 
-    // 🏆 LEADERBOARDS
-    LeaderboardService.saveScore(
+    // 🏆 LEADERBOARD
+    FirebaseLeaderboardService.saveScore(
       "casual_leaderboard",
       name,
       totalScore,
     );
 
-    LeaderboardService.saveScore(
+    FirebaseLeaderboardService.saveScore(
       currentGame == GameType.gameOne
           ? "matching_leaderboard"
           : "fill_blank_leaderboard",
@@ -70,6 +73,15 @@ AchievementService.unlock("first_play");
       score,
     );
 
+    setState(() {});
+  }
+
+  void tryAgain() {
+    isGameFinished = false;
+    setState(() {});
+  }
+
+  void goNextGame() {
     if (round >= maxRounds) {
       Navigator.pop(context);
     } else {
@@ -81,19 +93,53 @@ AchievementService.unlock("first_play");
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (!isGameFinished) {
+          final shouldExit = await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Exit Game?"),
+              content: const Text("Are you sure?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text("Exit"),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldExit != true) return false;
+        }
+
+        // 💾 SAVE BEFORE EXIT
         await ScoreSaver.save(totalScore);
-        LeaderboardService.saveScore(
+        FirebaseLeaderboardService.saveScore(
           "casual_leaderboard",
           UserSession.displayName ?? widget.username,
           totalScore,
         );
+
         return true;
       },
       child: SafeArea(
         child: AnimatedBackground(
           child: currentGame == GameType.gameOne
-              ? GameOneWrapper(onFinish: finishGame)
-              : GameTwoWrapper(onFinish: finishGame),
+              ? GameOneWrapper(
+                  onFinish: finishGame,
+                  isFinished: isGameFinished,
+                  onNext: goNextGame,
+                  onRetry: tryAgain,
+                )
+              : GameTwoWrapper(
+                  onFinish: finishGame,
+                  isFinished: isGameFinished,
+                  onNext: goNextGame,
+                  onRetry: tryAgain,
+                ),
         ),
       ),
     );
@@ -110,24 +156,44 @@ AchievementService.unlock("first_play");
 
 class GameOneWrapper extends StatelessWidget {
   final Function(int) onFinish;
-  const GameOneWrapper({super.key, required this.onFinish});
+  final bool isFinished;
+  final VoidCallback onNext;
+  final VoidCallback onRetry;
+
+  const GameOneWrapper({
+    super.key,
+    required this.onFinish,
+    required this.isFinished,
+    required this.onNext,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const GameOne(),
+        GameOne(onFinish: onFinish),
 
-        // ▶ NEXT GAME (UNIVERSAL POSITION)
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text("NEXT GAME"),
-            onPressed: () => onFinish(5), // score from GameOne logic
+        if (isFinished)
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: ElevatedButton(
+              child: const Text("TRY AGAIN"),
+              onPressed: onRetry,
+            ),
           ),
-        ),
+
+        if (isFinished)
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text("NEXT GAME"),
+              onPressed: onNext,
+            ),
+          ),
       ],
     );
   }
@@ -137,24 +203,44 @@ class GameOneWrapper extends StatelessWidget {
 
 class GameTwoWrapper extends StatelessWidget {
   final Function(int) onFinish;
-  const GameTwoWrapper({super.key, required this.onFinish});
+  final bool isFinished;
+  final VoidCallback onNext;
+  final VoidCallback onRetry;
+
+  const GameTwoWrapper({
+    super.key,
+    required this.onFinish,
+    required this.isFinished,
+    required this.onNext,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const GameTwo(),
+        GameTwo(onFinish: onFinish),
 
-        // ▶ NEXT GAME (UNIVERSAL POSITION)
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text("NEXT GAME"),
-            onPressed: () => onFinish(5), // score from GameTwo logic
+        if (isFinished)
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: ElevatedButton(
+              child: const Text("TRY AGAIN"),
+              onPressed: onRetry,
+            ),
           ),
-        ),
+
+        if (isFinished)
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text("NEXT GAME"),
+              onPressed: onNext,
+            ),
+          ),
       ],
     );
   }

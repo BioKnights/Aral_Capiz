@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:language_game/services/score_service.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/achievement_service.dart';
+import 'package:language_game/services/ad_service.dart';
+import 'package:language_game/services/firebase_leaderboard_service.dart';
 
 class GameThree extends StatefulWidget {
   const GameThree({super.key});
@@ -17,6 +18,8 @@ class GameThree extends StatefulWidget {
 class _GameThreeState extends State<GameThree> {
   static const int maxLives = 5;
   static const int timePerQuestion = 10;
+
+  
 
   int lives = maxLives;
   int level = 1;
@@ -50,9 +53,12 @@ class _GameThreeState extends State<GameThree> {
   @override
   void initState() {
     super.initState();
+
+    AdService.loadAd();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _nextQuestion();
   }
+  
 
   void _startTimer() {
     timer?.cancel();
@@ -100,7 +106,14 @@ class _GameThreeState extends State<GameThree> {
   // ===== MERGED GAME OVER + ACHIEVEMENTS + EXP =====
 
 void _gameOver() {
-  ScoreService.saveTotalScore(
+
+  if (score >= 30) {
+    AdService.showAd();
+  }
+
+  // 🔥 SAVE TO FIREBASE (GLOBAL LEADERBOARD)
+  FirebaseLeaderboardService.saveScore(
+    "guess_language_leaderboard",
     UserSession.displayName ?? "Guest",
     score,
   );
@@ -108,13 +121,13 @@ void _gameOver() {
   bool unlockedSomething = false;
 
   if (score >= 50) {
-    AchievementService.unlock("first_win");
+    AchievementService.unlock(context, "first_win");
     AchievementService.addExp(20);
     unlockedSomething = true;
   }
 
   if (level >= 5) {
-    AchievementService.unlock("speed_runner");
+    AchievementService.unlock(context, "speed_runner");
     AchievementService.addExp(30);
     unlockedSomething = true;
   }

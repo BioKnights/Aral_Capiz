@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/home/settings_popup.dart';
 import '../../services/animated_background.dart';
 import 'package:language_game/screen/Games/game_1.dart';
 import 'package:language_game/screen/Games/game_2.dart';
 import 'package:language_game/screen/Games/game_3.dart';
 import 'package:language_game/screen/Games/game_play_screen.dart';
 import 'package:language_game/screen/Games/leaderboard_screen.dart';
-import 'package:language_game/screen/home/settings_screen.dart';
 import 'package:language_game/services/user_session.dart';
 
 class GameScreen extends StatelessWidget {
@@ -45,11 +45,9 @@ class GameScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsScreen(),
-                  ),
+                showDialog(
+                  context: context,
+                  builder: (_) => const SettingsPopup(),
                 );
               },
             ),
@@ -98,7 +96,11 @@ class GameScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const GameOne(),
+                                  builder: (_) => GameOne(
+                                    onFinish: (score) {
+                                     Navigator.pop(context); // balik lang after game
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -118,7 +120,11 @@ _gameRow(
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => const GameTwo(),
+          builder: (_) => GameTwo(
+            onFinish: (score) {
+              Navigator.pop(context);
+            },
+          ),
         ),
       );
     },

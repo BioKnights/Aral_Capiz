@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:language_game/services/achievement_service.dart';
-import 'package:language_game/services/leaderboard_service.dart';
+import 'package:language_game/services/firebase_leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
+import 'package:language_game/services/ad_service.dart';
 
 class FlipCard {
   final String text, pair;
@@ -14,7 +15,9 @@ class FlipCard {
 }
 
 class GameOne extends StatefulWidget {
-  const GameOne({super.key});
+  final Function(int) onFinish;
+
+  const GameOne({super.key, required this.onFinish});
 
   @override
   State<GameOne> createState() => _GameOneState();
@@ -41,6 +44,7 @@ class _GameOneState extends State<GameOne> {
   bool win = false;
   bool lose = false;
   bool shuffling = true;
+  bool isFinished = false;
 
 final words = {
   "LOOK": "Lantaw",
@@ -103,6 +107,9 @@ final words = {
   @override
   void initState() {
     super.initState();
+
+    AdService.loadAd();
+
     Future.microtask(() => start(reset: true));
   }
 
@@ -155,7 +162,14 @@ final words = {
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (--time <= 0) {
         timer?.cancel();
-        setState(() => lose = true);
+        setState(() {         
+          lose = true;
+          isFinished = true;
+        });
+
+        widget.onFinish(score); // ⭐ ADD HERE
+        
+        AdService.showAd();
       }
       setState(() {});
     });
@@ -181,7 +195,7 @@ final words = {
     if (lock || shuffling || c.flipped || c.matched) return;
 
     playSound('audio/flip.mp3');
-    AchievementService.unlock("first_flip");
+    AchievementService.unlock(context, "first_flip");
 
     setState(() => c.flipped = true);
 
@@ -194,7 +208,7 @@ final words = {
 
     if (first!.pair == c.pair) {
       playSound('audio/match.mp3');
-      AchievementService.unlock( "first_match");
+      AchievementService.unlock(context, "first_match");
 
       first!.matched = true;
       c.matched = true;
@@ -204,21 +218,26 @@ final words = {
       maxStreak = max(maxStreak, streak);
       UserSession.addXp(10);
 
-      if (cards.every((x) => x.matched)) {
-        win = true;
-        timer?.cancel();
+if (cards.every((x) => x.matched)) {
+  win = true;
+  timer?.cancel();
 
-        stars = 3;
-        AchievementService.unlock( "TAPOS KA ANGAY GID");
+  stars = 3;
 
-        playSound('audio/win.mp3');
+  widget.onFinish(score); // ⭐ ADD HERE (VERY IMPORTANT)
 
-        LeaderboardService.saveScore(
-          "matching_leaderboard",
-          UserSession.displayName ?? "Guest",
-          score,
-        );
-      }
+  AchievementService.unlock(context, "TAPOS KA ANGAY GID");
+
+  playSound('audio/win.mp3');
+
+  AdService.showAd();
+
+  FirebaseLeaderboardService.saveScore(
+    "matching_leaderboard",
+    UserSession.displayName ?? "Guest",
+    score,
+  );
+}
 
       first = null;
       lock = false;

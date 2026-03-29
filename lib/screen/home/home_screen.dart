@@ -3,13 +3,14 @@ import 'package:language_game/screen/achievements/achievements_screen.dart';
 import 'package:language_game/screen/codex/codex_screen.dart';
 import 'package:language_game/screen/Games/games_screen.dart';
 import 'package:language_game/screen/home/profile_screen.dart';
-import 'package:language_game/screen/home/settings_screen.dart';
+import 'package:language_game/screen/home/settings_popup.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/music_service.dart';
 import 'package:language_game/widgets/level_bar.dart';
 import 'package:language_game/widgets/mascot_widget.dart';
 import 'package:language_game/screen/home/daily_missions_screen.dart';
+import 'chat_panel.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,8 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-
-              // ================= PROFILE + LEVEL (TOP LEFT) =================
+              // ================= PROFILE + LEVEL =================
               Positioned(
                 top: 20,
                 left: 20,
@@ -92,7 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             radius: 22,
                             backgroundColor: Colors.orange,
                             child: Text(
-                              UserSession.displayName != null
+                              (UserSession.displayName != null &&
+                                      UserSession.displayName!.isNotEmpty)
                                   ? UserSession.displayName![0].toUpperCase()
                                   : "?",
                               style: const TextStyle(
@@ -103,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-
                         ValueListenableBuilder<int>(
                           valueListenable: UserSession.xpNotifier,
                           builder: (_, __, ___) {
@@ -115,15 +115,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Level $level",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                // 🔥 IGN + LEVEL (FIXED)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      UserSession.displayName ?? "Player",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                  ],
                                 ),
+
                                 const SizedBox(height: 6),
+
                                 LevelBar(
                                   level: level,
                                   progress: progress,
@@ -139,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 18),
 
-                    // ================= WEEKLY MISSIONS (PAHIGDA) =================
+                    // ================= DAILY MISSIONS =================
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -157,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.orange.withOpacity(0.95),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: const [
-                            BoxShadow(                                                        
+                            BoxShadow(
                               color: Colors.black26,
                               blurRadius: 6,
                               offset: Offset(0, 4),
@@ -167,8 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.calendar_month,
-                                color: Colors.white),
+                            Icon(Icons.calendar_month, color: Colors.white),
                             SizedBox(width: 10),
                             Text(
                               "Daily Missions",
@@ -185,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // ================= SETTINGS (TOP RIGHT) =================
+              // ================= SETTINGS =================
               Positioned(
                 top: 20,
                 right: 20,
@@ -194,17 +202,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   iconSize: 28,
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsScreen(),
-                      ),
+                    showGeneralDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      barrierLabel: "Settings",
+                      barrierColor: Colors.black.withOpacity(0.4),
+                      transitionDuration: const Duration(milliseconds: 300),
+                      pageBuilder: (_, __, ___) {
+                        return const Center(child: SettingsPopup());
+                      },
                     );
                   },
                 ),
               ),
 
-              // ================= MASCOT (CENTER) =================
+              // ================= CHAT PANEL =================
+              Positioned(
+                left: 12,
+                bottom: 110,
+                child: ChatPanel(),
+              ),
+
+              // ================= MASCOT =================
               Center(
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height * 0.45,
@@ -236,8 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                const AchievementsScreen(),
+                            builder: (_) => const AchievementsScreen(),
                           ),
                         );
                       },
@@ -275,9 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ==================================================
-// HOVER ICON BUTTON
-// ==================================================
+// ================= HOVER BUTTON =================
 class HoverIconButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;

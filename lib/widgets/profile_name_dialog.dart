@@ -18,10 +18,10 @@ void showProfileNameDialog(BuildContext context) {
       actions: [
         ElevatedButton(
           onPressed: () {
-            final name = controller.text.trim(); // ✅ THIS WAS MISSING
+            final name = controller.text.trim();
 
             if (name.isNotEmpty) {
-              UserSession.setProfileName(name); // ✅ CORRECT METHOD
+              UserSession.setProfileName(name);
               Navigator.pop(context);
             }
           },

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/services/auth_service.dart';
-import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -27,11 +26,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> registerUser() async {
-    final username = usernameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       setState(() => message = "Please complete all fields");
       return;
     }
@@ -41,14 +39,12 @@ class _SignupScreenState extends State<SignupScreen> {
       message = "";
     });
 
-    final success =
-        await AuthService.registerUser(username, email, password);
+    final success = await AuthService.registerUser(email, password);
 
     if (!mounted) return;
 
     if (success) {
       // 💾 SAVE LOCAL SESSION
-      UserSession.loginLocal(username);
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       setState(() {
@@ -81,9 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 _field("Username", usernameController),
                 _field("Email", emailController),
                 _field("Password", passwordController, obscure: true),
-
                 const SizedBox(height: 20),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -97,7 +91,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         : const Text("CREATE ACCOUNT"),
                   ),
                 ),
-
                 if (message.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -105,7 +98,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: const TextStyle(color: Colors.redAccent),
                   ),
                 ],
-
                 TextButton(
                   onPressed: () =>
                       Navigator.pushReplacementNamed(context, '/login'),

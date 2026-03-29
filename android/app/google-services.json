@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "892705507147",
+    "project_id": "capiznon-language-app-7938d",
+    "storage_bucket": "capiznon-language-app-7938d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892705507147:android:51f79e2b64090843010ace",
+        "android_client_info": {
+          "package_name": "com.example.language_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBry_0_ocFtk0i-12IzRPTxUHhm3JWCwp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

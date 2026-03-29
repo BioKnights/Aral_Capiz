@@ -3,6 +3,7 @@ import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/auth_service.dart';
 import 'signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
   bool _loading = false;
 
+  // ================= EMAIL LOGIN =================
   Future<void> _login() async {
     final email = _email.text.trim();
     final password = _pass.text.trim();
@@ -36,8 +38,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      final user = AuthService.currentUser!;
-      UserSession.loginLocal(user['username']);
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+
+      if (firebaseUser != null) {
+        UserSession.userId = firebaseUser.uid;
+        await UserSession.loadFromFirebase();
+      }
+
+      await UserSession.syncToFirebase();
+
+      if (!mounted) return;
+
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       setState(() {
@@ -47,11 +58,32 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // ================= GOOGLE LOGIN =================
+  Future<void> _googleLogin() async {
+    final success = await AuthService.signInWithGoogle();
+
+    if (!mounted) return;
+
+    if (success) {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        UserSession.userId = user.uid;
+        await UserSession.loadFromFirebase();
+      }
+
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  // ================= GUEST =================
   void _guest() {
     UserSession.guest();
+    UserSession.userId = null;
     Navigator.pushReplacementNamed(context, '/home');
   }
 
+  // ================= NAVIGATE REGISTER =================
   void _goToRegister() {
     Navigator.push(
       context,
@@ -120,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
+                  // 🔥 EMAIL LOGIN
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -130,7 +163,77 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 12),
+
+                  // 🔥 GOOGLE BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _googleLogin,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google.png',
+                            height: 22,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            "Continue with Google",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 10),
+
+                  // 🔥 FACEBOOK BUTTON (UI only)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1877F2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Facebook login soon 🚀"),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/facebook.png',
+                            height: 22,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            "Continue with Facebook",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
 
                   SizedBox(
                     width: double.infinity,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/cuartero/cuartero_history.dart';
+import 'package:language_game/screen/codex/history/ivisan/ivisan_history.dart';
 import '../../../widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/screen/codex/history/roxas_city/roxas_city_screen.dart';
 import '../../../services/animated_background.dart';
@@ -29,7 +31,7 @@ class History extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Tourist Spots"),
+          title: const Text("History"),
           centerTitle: true,
         ),
 
@@ -49,9 +51,7 @@ class History extends StatelessWidget {
               return CultureCard(
                 title: item.title,
                 imagePath: item.image,
-                onTap: item.onTap != null
-                    ? () => item.onTap!(context)
-                    : () {},
+                onTap: item.onTap != null ? () => item.onTap!(context) : () {},
               );
             },
           ),
@@ -94,7 +94,13 @@ final List<_CultureItem> _cultureItems = [
   ),
   _CultureItem(
     title: "Ivisan",
-    image: "assets/images/roxas_cathedral.jpg",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const IvisanHistory()),
+      );
+    },
   ),
   _CultureItem(
     title: "Pontevedra",
@@ -103,5 +109,15 @@ final List<_CultureItem> _cultureItems = [
   _CultureItem(
     title: "Panit-an",
     image: "assets/images/roxas_cathedral.jpg",
+  ),
+  _CultureItem(
+    title: "Cuartero",
+    image: "assets/images/agdahanay_festival_02_(cuartero).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CuarteroHistory()),
+      );
+    },
   ),
 ];
