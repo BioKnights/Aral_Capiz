@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:language_game/services/auth_gate.dart'; // 🔥 IMPORT AUTH GATE
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,6 +11,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+
   late AnimationController controller;
   late Animation<double> fade;
 
@@ -26,8 +28,16 @@ class _SplashScreenState extends State<SplashScreen>
 
     controller.forward();
 
+    // 🔥 AFTER SPLASH → AUTH GATE (AUTO LOGIN CHECK)
     Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/login');
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AuthGate(),
+        ),
+      );
     });
   }
 

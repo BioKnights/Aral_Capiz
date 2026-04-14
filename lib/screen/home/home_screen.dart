@@ -23,7 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    MusicService.start();
+    if (!MusicService.isPlaying) {
+  MusicService.start();
+}
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!UserSession.hasProfile) {

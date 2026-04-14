@@ -9,7 +9,12 @@ import 'package:language_game/services/ad_service.dart';
 import 'package:language_game/services/firebase_leaderboard_service.dart';
 
 class GameThree extends StatefulWidget {
-  const GameThree({super.key});
+  final Future<bool> Function() onBack;
+
+  const GameThree({
+    super.key,
+    required this.onBack,
+  });
 
   @override
   State<GameThree> createState() => _GameThreeState();
@@ -18,8 +23,6 @@ class GameThree extends StatefulWidget {
 class _GameThreeState extends State<GameThree> {
   static const int maxLives = 5;
   static const int timePerQuestion = 10;
-
-  
 
   int lives = maxLives;
   int level = 1;
@@ -58,14 +61,15 @@ class _GameThreeState extends State<GameThree> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _nextQuestion();
   }
-  
 
   void _startTimer() {
     timer?.cancel();
     timeLeft = timePerQuestion;
+
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       setState(() {
         timeLeft--;
+
         if (timeLeft <= 0) {
           _wrongAnswer();
         }
@@ -103,67 +107,60 @@ class _GameThreeState extends State<GameThree> {
     }
   }
 
-  // ===== MERGED GAME OVER + ACHIEVEMENTS + EXP =====
+  void _gameOver() {
+    if (score >= 30) {
+      AdService.showAd();
+    }
 
-void _gameOver() {
+    FirebaseLeaderboardService.saveScore(
+      "guess_language_leaderboard",
+      UserSession.displayName ?? "Guest",
+      score,
+    );
 
-  if (score >= 30) {
-    AdService.showAd();
-  }
+    bool unlockedSomething = false;
 
-  // 🔥 SAVE TO FIREBASE (GLOBAL LEADERBOARD)
-  FirebaseLeaderboardService.saveScore(
-    "guess_language_leaderboard",
-    UserSession.displayName ?? "Guest",
-    score,
-  );
+    if (score >= 50) {
+      AchievementService.unlock(context, "first_win");
+      AchievementService.addExp(20);
+      unlockedSomething = true;
+    }
 
-  bool unlockedSomething = false;
+    if (level >= 5) {
+      AchievementService.unlock(context, "speed_runner");
+      AchievementService.addExp(30);
+      unlockedSomething = true;
+    }
 
-  if (score >= 50) {
-    AchievementService.unlock(context, "first_win");
-    AchievementService.addExp(20);
-    unlockedSomething = true;
-  }
+    if (unlockedSomething) {
+      AchievementService.showPopup(context);
+    }
 
-  if (level >= 5) {
-    AchievementService.unlock(context, "speed_runner");
-    AchievementService.addExp(30);
-    unlockedSomething = true;
-  }
-
-  if (unlockedSomething) {
-    AchievementService.showPopup(context);
-  }
-
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      title: const Text("Game Over"),
-      content: Text(
-        "Score: $score\nLevel Reached: $level",
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("Game Over"),
+        content: Text("Score: $score\nLevel Reached: $level"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _restart();
+            },
+            child: const Text("Try Again"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text("Main Menu"),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            _restart();
-          },
-          child: const Text("Try Again"),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
-          child: const Text("Main Menu"),
-        ),
-      ],
-    ),
-  );
-}
-
+    );
+  }
 
   void _restart() {
     setState(() {
@@ -189,6 +186,15 @@ void _gameOver() {
         appBar: AppBar(
           title: const Text("Guess the Language"),
           backgroundColor: Colors.deepPurple.withOpacity(0.7),
+
+          // ✅ BACK BUTTON CONNECTED
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final shouldExit = await widget.onBack();
+              if (shouldExit) Navigator.pop(context);
+            },
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16),
@@ -231,12 +237,9 @@ void _gameOver() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("❤️ $lives",
-            style: const TextStyle(color: Colors.white, fontSize: 18)),
-        Text("⏱ $timeLeft",
-            style: const TextStyle(color: Colors.white, fontSize: 18)),
-        Text("⭐ $score",
-            style: const TextStyle(color: Colors.white, fontSize: 18)),
+        Text("❤️ $lives", style: const TextStyle(color: Colors.white)),
+        Text("⏱ $timeLeft", style: const TextStyle(color: Colors.white)),
+        Text("⭐ $score", style: const TextStyle(color: Colors.white)),
       ],
     );
   }

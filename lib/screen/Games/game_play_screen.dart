@@ -12,15 +12,15 @@ enum GameType { gameOne, gameTwo }
 
 /* ================= GAME PLAY SCREEN ================= */
 
-class GamePlayScreen extends StatefulWidget {
+class CasualGame extends StatefulWidget {
   final String username;
-  const GamePlayScreen({super.key, required this.username});
+  const CasualGame({super.key, required this.username});
 
   @override
-  State<GamePlayScreen> createState() => _GamePlayScreenState();
+  State<CasualGame> createState() => _GamePlayScreenState();
 }
 
-class _GamePlayScreenState extends State<GamePlayScreen> {
+class _GamePlayScreenState extends State<CasualGame> {
   final Random _random = Random();
   int totalScore = 0;
   int round = 0;
@@ -245,3 +245,4 @@ class GameTwoWrapper extends StatelessWidget {
     );
   }
 }
+

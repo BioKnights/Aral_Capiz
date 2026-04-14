@@ -9,33 +9,75 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // 🔥 ADD THIS
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 🔥 INIT ADS
   if (Platform.isAndroid || Platform.isIOS) {
     await MobileAds.instance.initialize();
   }
 
+  // 🔥 INIT FIREBASE
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await UserSession.load(); // 🔥 VERY IMPORTANT
+  // 🔥 FORCE LOGOUT (FIX AUTO LOGIN)
+  await FirebaseAuth.instance.signOut();
 
+  // 🔥 LOAD LOCAL SESSION
+  await UserSession.load();
+
+  // 🔥 LOCK PORTRAIT
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
+  // 🔥 INIT MUSIC
   await MusicService.init();
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// 🔥 NOW STATEFUL (for lifecycle control)
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // 🔥 ENSURE MUSIC START ONLY ONCE
+    if (!MusicService.isPlaying) {
+      MusicService.start();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // 🔥 APP LIFECYCLE CONTROL
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      MusicService.pause(); // 🔇 minimize
+    } else if (state == AppLifecycleState.resumed) {
+      MusicService.resume(); // 🔊 balik open
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,58 +88,14 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.transparent,
       ),
 
-      home: const SplashGate(),
+      // 🔥 START WITH SPLASH
+      home: const SplashScreen(),
 
       routes: {
-        '/login': (_) => LoginScreen(),
-        '/signup': (_) => SignupScreen(),
-        '/home': (_) => HomeScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/signup': (_) => const SignupScreen(),
+        '/home': (_) => const HomeScreen(),
       },
     );
-  }
-}
-
-/// ================= SPLASH + AUTO LOGIN GATE =================
-
-class SplashGate extends StatefulWidget {
-  const SplashGate({super.key});
-
-  @override
-  State<SplashGate> createState() => _SplashGateState();
-}
-
-class _SplashGateState extends State<SplashGate> {
-
-  @override
-  void initState() {
-    super.initState();
-    _start();
-  }
-
-  Future<void> _start() async {
-
-    // splash delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (!mounted) return;
-
-    if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SplashScreen();
   }
 }

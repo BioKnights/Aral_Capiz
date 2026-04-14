@@ -15,7 +15,7 @@ class GameScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => GamePlayScreen(
+        builder: (_) => CasualGame(
           username: UserSession.displayName ?? "Guest",
         ),
       ),
@@ -98,7 +98,7 @@ class GameScreen extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => GameOne(
                                     onFinish: (score) {
-                                     Navigator.pop(context); // balik lang after game
+                                      Navigator.pop(context);
                                     },
                                   ),
                                 ),
@@ -109,43 +109,66 @@ class GameScreen extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         // ROW 2
-_gameRow(
-  cardHeight,
-  _GameCard(
-    icon: Icons.filter_2,
-    title: "GAME 2",
-    subtitle: "Quiz Challenge",
-    color: Colors.green,
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => GameTwo(
-            onFinish: (score) {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-      );
-    },
-  ),
-  _GameCard(
-    icon: Icons.filter_3,
-    title: "GAME 3",
-    subtitle: "Guess the Language",
-    color: Colors.purple,
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const GameThree(),
-        ),
-      );
-    },
-  ),
-),
+                        _gameRow(
+                          cardHeight,
+                          _GameCard(
+                            icon: Icons.filter_2,
+                            title: "GAME 2",
+                            subtitle: "Quiz Challenge",
+                            color: Colors.green,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GameTwo(
+                                    onFinish: (score) {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          _GameCard(
+                            icon: Icons.filter_3,
+                            title: "GAME 3",
+                            subtitle: "Guess the Language",
+                            color: Colors.purple,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GameThree(
+                                    onBack: () async {
+                                      return await showDialog(
+                                            context: context,
+                                            builder: (_) => AlertDialog(
+                                              title: const Text("Exit Game?"),
+                                              content: const Text(
+                                                  "Sigurado ka gusto mo mag guwa?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context, false),
+                                                  child: const Text("Cancel"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context, true),
+                                                  child: const Text("Exit"),
+                                                ),
+                                              ],
+                                            ),
+                                          ) ??
+                                          false;
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 16),
-
 
                         // ROW 3
                         _gameRow(
@@ -165,7 +188,7 @@ _gameRow(
                             onTap: () {},
                           ),
                         ),
-                           const SizedBox(height: 16),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
