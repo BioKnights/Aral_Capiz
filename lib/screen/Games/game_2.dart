@@ -22,10 +22,8 @@ class _GameTwoState extends State<GameTwo> {
   @override
   void initState() {
     super.initState();
-
     loadLevel();
-
-    AdService.loadAd(); // 🔥 LOAD AD HERE
+    AdService.loadAd();
   }
 
   final List<Map<String, dynamic>> questions = [
@@ -211,7 +209,6 @@ class _GameTwoState extends State<GameTwo> {
     },
   ];
 
-  // 🔥 LEVEL SYSTEM
   int level = 1;
   int questionsPerLevel = 3;
   List<Map<String, dynamic>> currentQuestions = [];
@@ -225,7 +222,6 @@ class _GameTwoState extends State<GameTwo> {
 
   int combo = 0;
 
-  // 🔥 maxRounds now per level
   int get maxRounds => questionsPerLevel;
 
   void loadLevel() {
@@ -234,14 +230,12 @@ class _GameTwoState extends State<GameTwo> {
     int difficulty = (level ~/ 5);
     int start = difficulty * 3;
 
-    // 🔥 SAFE GUARD (para indi ma empty)
     if (start >= questions.length) {
       start = 0;
     }
 
     currentQuestions = questions.skip(start).take(questionsPerLevel).toList();
 
-    // 🔥 fallback kung kulang pa gid
     if (currentQuestions.length < questionsPerLevel) {
       currentQuestions = questions.take(questionsPerLevel).toList();
     }
@@ -279,6 +273,7 @@ class _GameTwoState extends State<GameTwo> {
     setState(() => selectedWord = word);
   }
 
+  // 🔥 MERGED CHECK ANSWER WITH ACHIEVEMENTS
   void checkAnswer() async {
     if (selectedWord == null) return;
 
@@ -288,7 +283,26 @@ class _GameTwoState extends State<GameTwo> {
     if (correct) {
       combo++;
       score += 1 + combo;
-      AchievementService.unlock(context, "fill_blank_correct");
+
+      // 🏆 ACHIEVEMENTS
+      AchievementService.unlock(context, "fill_blank_first");
+
+      if (score >= 3) {
+        AchievementService.unlock(context, "fill_blank_3_correct");
+      }
+
+      if (combo >= 3) {
+        AchievementService.unlock(context, "fill_blank_combo_3");
+      }
+
+      if (combo >= 5) {
+        AchievementService.unlock(context, "fill_blank_combo_5");
+      }
+
+      if (combo >= 2) {
+        AchievementService.unlock(context, "fill_blank_speed");
+      }
+
       UserSession.addXp(10);
       await playSound("audio/correct.mp3");
     } else {
@@ -317,10 +331,14 @@ class _GameTwoState extends State<GameTwo> {
 
   @override
   Widget build(BuildContext context) {
-    // 🏁 FINISH SCREEN
     if (index >= maxRounds) {
       if (!saved) {
         saved = true;
+
+        // 🏆 PERFECT ACHIEVEMENT
+        if (score == maxRounds) {
+          AchievementService.unlock(context, "fill_blank_perfect");
+        }
 
         playSound("audio/win.mp3");
         AdService.showAd();
@@ -341,60 +359,36 @@ class _GameTwoState extends State<GameTwo> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "🎉 Level $level Complete!",
-                  style: const TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text("🎉 Level $level Complete!",
+                    style: const TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (i) {
-                    return Icon(
-                      i < stars ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
-                      size: 40,
-                    );
-                  }),
+                  children: List.generate(
+                      3,
+                      (i) => Icon(
+                            i < stars ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 40,
+                          )),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  "Score: $score / $maxRounds",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
+                Text("Score: $score / $maxRounds",
+                    style: const TextStyle(fontSize: 20, color: Colors.white)),
                 const SizedBox(height: 32),
-                SizedBox(
-                  width: 220,
-                  child: ElevatedButton(
-                    onPressed: restart,
-                    child: const Text("RESTART"),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: 220,
-                  child: ElevatedButton(
+                ElevatedButton(onPressed: restart, child: const Text("RESTART")),
+                ElevatedButton(
                     onPressed: nextLevel,
-                    child: const Text("NEXT LEVEL"),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: 220,
-                  child: ElevatedButton(
+                    child: const Text("NEXT LEVEL")),
+                ElevatedButton(
                     onPressed: () {
                       widget.onFinish(score);
                       Navigator.pop(context);
                     },
-                    child: const Text("MAIN MENU"),
-                  ),
-                ),
+                    child: const Text("MAIN MENU")),
               ],
             ),
           ),
@@ -404,135 +398,28 @@ class _GameTwoState extends State<GameTwo> {
 
     final q = currentQuestions[index];
 
-    // 🎮 GAME SCREEN
-    return WillPopScope(
-      onWillPop: () async {
-        if (index > 0) {
-          return await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Exit Game?"),
-              content: const Text("Sigurado ka gusto mo mag guwa?"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text("Exit"),
-                ),
-              ],
-            ),
-          );
-        }
-        return true;
-      },
-      child: AnimatedBackground(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.black54,
-            title: Text("Level $level"),
-          ),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  LinearProgressIndicator(
-                    value: (index + 1) / maxRounds,
-                    backgroundColor: Colors.white24,
-                    color: Colors.green,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "🔥 Combo: $combo",
-                    style: const TextStyle(color: Colors.orange),
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    "${q["sentence"]} _____.",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 26,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: checked
-                          ? (correct
-                              ? Colors.green.withOpacity(0.3)
-                              : Colors.red.withOpacity(0.3))
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: checked
-                            ? (correct ? Colors.green : Colors.red)
-                            : Colors.white54,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(
-                      selectedWord ?? "______",
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: selectedWord == null
-                            ? Colors.white38
-                            : Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: List.generate(
-                      q["options"].length,
-                      (i) {
-                        final word = q["options"][i];
-                        return ChoiceChip(
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.black54,
+          title: Text("Level $level"),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Text("${q["sentence"]} _____"),
+              Wrap(
+                children: q["options"]
+                    .map<Widget>((word) => ChoiceChip(
                           label: Text(word),
                           selected: selectedWord == word,
-                          selectedColor: checked
-                              ? (word == q["answer"]
-                                  ? Colors.green
-                                  : Colors.red)
-                              : Colors.orange,
                           onSelected: (_) => selectWord(word),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed:
-                          selectedWord == null || checked ? null : checkAnswer,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        "CHECK",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                ],
+                        ))
+                    .toList(),
               ),
-            ),
+              ElevatedButton(onPressed: checkAnswer, child: Text("CHECK"))
+            ],
           ),
         ),
       ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:styled_text/styled_text.dart';
 import '/services/animated_background.dart';
 
-class IvisanMunicipal extends StatelessWidget {
-  const IvisanMunicipal({super.key});
+class IvisanMunicipalScreen extends StatelessWidget {
+  const IvisanMunicipalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,32 +22,25 @@ class IvisanMunicipal extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🖼 Image (Responsive)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(18),
                   child: Image.asset(
-                    "assets/images/agdahanay_festival_02_(cuartero).jpg",
+                    "assets/images/ivisan_municipality.jpg",
                     width: double.infinity,
                     height: size.width > 600 ? 320 : 220,
                     fit: BoxFit.cover,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // 🏛 Title
                 const Text(
-                  "Ivisan",
+                  "History of Ivisan",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
-                // 📜 Description Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -54,15 +48,17 @@ class IvisanMunicipal extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.white24),
                   ),
-                  child: const Text(
-                    "<placeholder>\n\n"
-                    "<placeholder>"
-                    "<placeholder>",
-                    style: TextStyle(
+                  child: StyledText(
+                    text: "Ivisan, a 4th-class municipality in the province of Capiz, officially became a town in 1815, known historically for its abundant shellfish and as a \"place of abundant shellfish\" (meaning <i>ivus</i>).\n"
+                          "Originally part of the Parishes of Panay and Capiz, it was established as a separate parish on January 6, 1849.\n\n",
+                    style: const TextStyle(
                       fontSize: 16,
                       height: 1.6,
                       color: Colors.white70,
                     ),
+                    tags: {
+                      'i': StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
+                    },
                   ),
                 ),
               ],

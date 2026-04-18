@@ -3,36 +3,14 @@ import 'package:language_game/widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/screen/codex/folklore/cuartero/pedro_mandez.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class Cuartero extends StatelessWidget {
-  const Cuartero({super.key});
+class CuarteroFolklore extends StatelessWidget {
+  const CuarteroFolklore({super.key});
 
   static final List<Map<String, dynamic>> _items = [
     {
       "title": "Pedro Mandez",
-      "image": "assets/images/dave.png",
-      "screen": const PedroMandez(),
-    },
-    {
-      "title": "Roxas City Museum",
-      "image": "assets/images/roxas_city_museum.jpg",
-      "screen": const ComingSoonScreen(title: "Roxas City Museum"),
-    },
-    {
-      "title": "Palina Greenbelt Ecopark",
-      "image": "assets/images/palina.jpg",
-      "screen": const ComingSoonScreen(title: "Palina Greenbelt Ecopark"),
-    },
-    {
-      "title": "The Ruins of Alcatraz",
-      "image": "assets/images/ruin.jpg",
-      "screen": const ComingSoonScreen(title: "The Ruins of Alcatraz"),
-    },
-    {
-      "title": "Sacred Heart of Jesus Shrine",
-      "image": "assets/images/jesus.jpg",
-      "screen": const ComingSoonScreen(
-        title: "Sacred Heart of Jesus Shrine",
-      ),
+      "image": "assets/images/man_silhouette.jpg",
+      "screen": PedroMandez(),
     },
   ];
 
@@ -51,7 +29,7 @@ class Cuartero extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Roxas City"),
+          title: const Text("Cuartero Folklore"),
           centerTitle: true,
         ),
         body: GridView.builder(
@@ -104,7 +82,7 @@ class ComingSoonScreen extends StatelessWidget {
         ),
         body: const Center(
           child: Text(
-            "Content coming soon 👀",
+            "Placeholder 2",
             style: TextStyle(
               fontSize: 18,
               color: Colors.white,

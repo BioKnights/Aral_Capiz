@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/auth_service.dart';
+import 'package:language_game/services/achievement_service.dart'; // 🔥 ADD THIS
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -42,7 +43,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (firebaseUser != null) {
         UserSession.userId = firebaseUser.uid;
+
         await UserSession.loadFromFirebase();
+
+        // 🔥 LOAD ACHIEVEMENTS HERE
+        await AchievementService.load();
       }
 
       await UserSession.syncToFirebase();
@@ -69,7 +74,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         UserSession.userId = user.uid;
+
         await UserSession.loadFromFirebase();
+
+        // 🔥 LOAD ACHIEVEMENTS HERE
+        await AchievementService.load();
       }
 
       Navigator.pushReplacementNamed(context, '/home');
@@ -80,6 +89,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void _guest() {
     UserSession.guest();
     UserSession.userId = null;
+
+    // ❌ NO Firebase → NO load()
+
     Navigator.pushReplacementNamed(context, '/home');
   }
 

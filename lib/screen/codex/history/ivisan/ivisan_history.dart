@@ -3,14 +3,14 @@ import 'package:language_game/widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/screen/codex/history/ivisan/ivisan_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class IvisanHistory extends StatelessWidget {
-  const IvisanHistory({super.key});
+class IvisanHistoryScreen extends StatelessWidget {
+  const IvisanHistoryScreen({super.key});
 
   static const _items = [
     {
-      "title": "Ivisan Municipal",
+      "title": "Ivisan",
       "image": "assets/images/ivisan_municipality.jpg",
-      "screen": IvisanMunicipal(),
+      "screen": IvisanMunicipalScreen(),
     },
   ];
 
@@ -22,14 +22,14 @@ class IvisanHistory extends StatelessWidget {
 
     return AnimatedBackground(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // ❗ REQUIRED
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.black54,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Roxas City"),
+          title: const Text("Dao"),
           centerTitle: true,
         ),
         body: GridView.builder(

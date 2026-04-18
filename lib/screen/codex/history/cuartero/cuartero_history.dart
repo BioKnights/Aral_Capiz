@@ -3,30 +3,14 @@ import 'package:language_game/widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/screen/codex/history/cuartero/cuartero_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class CuarteroHistory extends StatelessWidget {
-  const CuarteroHistory({super.key});
+class CuarteroHistoryScreen extends StatelessWidget {
+  const CuarteroHistoryScreen({super.key});
 
   static const _items = [
     {
       "title": "Cuartero",
-      "image": "assets/images/agdahanay_festival_(cuartero).jpg",
-      "screen": CuarteroScreen(),
-    },
-    {
-      "title": "Roxas City Museum",
-      "image": "assets/images/roxas_city_museum.jpg",
-    },
-    {
-      "title": "Palina Greenbelt Ecopark",
-      "image": "assets/images/palina.jpg",
-    },
-    {
-      "title": "The Ruins of Alcatraz",
-      "image": "assets/images/ruin.jpg",
-    },
-    {
-      "title": "Sacred Heart of Jesus Shrine",
-      "image": "assets/images/jesus.jpg",
+      "image": "assets/images/municipal_hall(cuartero).jpg",
+      "screen": CuarteroMunicipalScreen(),
     },
   ];
 
@@ -38,14 +22,14 @@ class CuarteroHistory extends StatelessWidget {
 
     return AnimatedBackground(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // ❗ REQUIRED
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.black54,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Roxas City"),
+          title: const Text("Cuartero"),
           centerTitle: true,
         ),
         body: GridView.builder(

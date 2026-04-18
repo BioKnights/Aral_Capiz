@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:language_game/screen/codex/tourist_spots/ivisan/bitch.dart';
+import 'package:language_game/screen/codex/tourist_spots/ivisan/ivisan_beach.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
 import 'package:language_game/services/animated_background.dart';
 
@@ -10,7 +10,7 @@ class Ivisan extends StatelessWidget {
     {
       "title": "Bitch House",
       "image": "assets/images/ivisan_beach.jpg",
-      "screen": Bitch(),
+      "screen": IvisanBeachScreen(),
     },
     {
       "title": "Roxas City Museum",

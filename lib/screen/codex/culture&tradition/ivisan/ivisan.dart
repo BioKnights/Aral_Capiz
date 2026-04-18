@@ -1,32 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/tourist_spots/roxas_city/cathedral_screen.dart';
+import 'package:language_game/screen/codex/culture&tradition/ivisan/ivisan_buyloganay_festival.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class RoxasCityScreen extends StatelessWidget {
-  const RoxasCityScreen({super.key});
+class IvisanCultureScreen extends StatelessWidget {
+  const IvisanCultureScreen({super.key});
 
   static const _items = [
     {
-      "title": "Metropolitan Cathedral",
-      "image": "assets/images/roxas_cathedral.jpg",
-      "screen": CathedralScreen(),
-    },
-    {
-      "title": "Roxas City Museum",
-      "image": "assets/images/roxas_city_museum.jpg",
-    },
-    {
-      "title": "Palina Greenbelt Ecopark",
-      "image": "assets/images/palina.jpg",
-    },
-    {
-      "title": "The Ruins of Alcatraz",
-      "image": "assets/images/ruin.jpg",
-    },
-    {
-      "title": "Sacred Heart of Jesus Shrine",
-      "image": "assets/images/jesus.jpg",
+      "title": "Buyloganay Festival",
+      "image": "assets/images/buyloganay_festival_(02)_(ivisan).jpg",
+      "screen": IvisanFestivalScreen(),
     },
   ];
 
@@ -45,7 +29,7 @@ class RoxasCityScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Roxas City"),
+          title: const Text("Ivisan Culture & Tradition"),
           centerTitle: true,
         ),
         body: GridView.builder(

@@ -11,6 +11,7 @@ import 'package:language_game/widgets/level_bar.dart';
 import 'package:language_game/widgets/mascot_widget.dart';
 import 'package:language_game/screen/home/daily_missions_screen.dart';
 import 'chat_panel.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,8 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     if (!MusicService.isPlaying) {
-  MusicService.start();
-}
+      MusicService.start();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!UserSession.hasProfile) {
@@ -72,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-              // ================= PROFILE + LEVEL =================
               Positioned(
                 top: 20,
                 left: 20,
@@ -117,24 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // 🔥 IGN + LEVEL (FIXED)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      UserSession.displayName ?? "Player",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                  ],
+                                Text(
+                                  UserSession.displayName ?? "Player",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-
                                 const SizedBox(height: 6),
-
                                 LevelBar(
                                   level: level,
                                   progress: progress,
@@ -150,7 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 18),
 
-                    // ================= DAILY MISSIONS =================
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -195,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // ================= SETTINGS =================
               Positioned(
                 top: 20,
                 right: 20,
@@ -218,14 +207,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // ================= CHAT PANEL =================
+              // 🔥 LANDSCAPE SLIDESHOW
+              const Positioned(
+                right: 20,
+                top: 140,
+                child: PlaceSlideshow(),
+              ),
+
               Positioned(
                 left: 12,
                 bottom: 110,
                 child: ChatPanel(),
               ),
 
-              // ================= MASCOT =================
               Center(
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height * 0.45,
@@ -243,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // ================= BOTTOM ICONS =================
               Positioned(
                 bottom: 28,
                 left: 0,
@@ -289,6 +282,100 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ================= SLIDESHOW =================
+class PlaceSlideshow extends StatefulWidget {
+  const PlaceSlideshow({super.key});
+
+  @override
+  State<PlaceSlideshow> createState() => _PlaceSlideshowState();
+}
+
+class _PlaceSlideshowState extends State<PlaceSlideshow> {
+  final PageController _controller = PageController();
+  int _current = 0;
+  Timer? _timer;
+
+  final List<String> images = [
+    "assets/images/agbalo_river_(pontevedra).jpg",
+    "assets/images/agdahanay_festival_02_(cuartero).jpg",
+    "assets/images/hut_(cuartero).jpg",
+    "assets/images/hinulugan_falls_(pilar).jpg",
+    "assets/images/roxas_cathedral.jpg",
+    "assets/images/Roxas_city.jpg",
+    "assets/images/sigma.jpg",
+    "assets/images/ruin.jpg",
+    "assets/images/tagbuan_festival_(pilar).jpg",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      _current++;
+      if (_current >= images.length) _current = 0;
+
+      _controller.animateToPage(
+        _current,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200, // 🔥 LANDSCAPE
+      height: 120, // 🔥 LANDSCAPE
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Colors.black45, blurRadius: 6),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: PageView.builder(
+          controller: _controller,
+          itemCount: images.length,
+          itemBuilder: (_, index) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  images[index],
+                  fit: BoxFit.cover,
+                ),
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  padding: const EdgeInsets.all(4),
+                  color: Colors.black.withOpacity(0.4),
+                  child: Text(
+                    "Place ${index + 1}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
         ),
       ),
     );

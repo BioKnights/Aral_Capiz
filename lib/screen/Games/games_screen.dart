@@ -4,7 +4,7 @@ import '../../services/animated_background.dart';
 import 'package:language_game/screen/Games/game_1.dart';
 import 'package:language_game/screen/Games/game_2.dart';
 import 'package:language_game/screen/Games/game_3.dart';
-import 'package:language_game/screen/Games/game_play_screen.dart';
+import 'package:language_game/screen/Games/game_0.dart';
 import 'package:language_game/screen/Games/leaderboard_screen.dart';
 import 'package:language_game/services/user_session.dart';
 
@@ -15,8 +15,8 @@ class GameScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CasualGame(
-          username: UserSession.displayName ?? "Guest",
+        builder: (_) => TrueFalse(
+          username: UserSession.displayName ?? "Bisita",
         ),
       ),
     );
@@ -28,7 +28,7 @@ class GameScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Play Game"),
+          title: const Text("Hampang"),
           backgroundColor: Colors.black54,
           actions: [
             IconButton(
@@ -64,7 +64,7 @@ class GameScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const Text(
-                    "Choose a Game Mode",
+                    "Pili sang Hampang",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -82,15 +82,15 @@ class GameScreen extends StatelessWidget {
                           cardHeight,
                           _GameCard(
                             icon: Icons.shuffle,
-                            title: "CASUAL",
-                            subtitle: "Random Games",
+                            title: "Matuod ukon Indi",
+                            subtitle: "pili-a ang tsakto nga sabat",
                             color: Colors.orange,
                             onTap: () => _playCasual(context),
                           ),
                           _GameCard(
                             icon: Icons.filter_1,
-                            title: "GAME 1",
-                            subtitle: "Matching Game",
+                            title: "ipares ang baraha",
+                            subtitle: "Baliskara kag ipares ang baraha",
                             color: Colors.blue,
                             onTap: () {
                               Navigator.push(
@@ -113,8 +113,8 @@ class GameScreen extends StatelessWidget {
                           cardHeight,
                           _GameCard(
                             icon: Icons.filter_2,
-                            title: "GAME 2",
-                            subtitle: "Quiz Challenge",
+                            title: "Pangutana nga Hampang",
+                            subtitle: "mga mabudlay nga pamangkot",
                             color: Colors.green,
                             onTap: () {
                               Navigator.push(
@@ -131,8 +131,8 @@ class GameScreen extends StatelessWidget {
                           ),
                           _GameCard(
                             icon: Icons.filter_3,
-                            title: "GAME 3",
-                            subtitle: "Guess the Language",
+                            title: "Hula-a ang Linggwahe",
+                            subtitle: "pagtuon sang bag-o nga linggwahe",
                             color: Colors.purple,
                             onTap: () {
                               Navigator.push(
@@ -143,19 +143,19 @@ class GameScreen extends StatelessWidget {
                                       return await showDialog(
                                             context: context,
                                             builder: (_) => AlertDialog(
-                                              title: const Text("Exit Game?"),
+                                              title: const Text("Guwa sa Hampang?"),
                                               content: const Text(
-                                                  "Sigurado ka gusto mo mag guwa?"),
+                                                  "Sigurado ka nga gusto mo mag guwa?"),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
                                                       Navigator.pop(context, false),
-                                                  child: const Text("Cancel"),
+                                                  child: const Text("Indi"),
                                                 ),
                                                 TextButton(
                                                   onPressed: () =>
                                                       Navigator.pop(context, true),
-                                                  child: const Text("Exit"),
+                                                  child: const Text("Oo"),
                                                 ),
                                               ],
                                             ),
@@ -175,15 +175,15 @@ class GameScreen extends StatelessWidget {
                           cardHeight,
                           _GameCard(
                             icon: Icons.filter_4,
-                            title: "GAME 4",
-                            subtitle: "Coming Soon",
+                            title: "HAMPANG 4",
+                            subtitle: "Maabot pa",
                             color: Colors.red,
                             onTap: () {},
                           ),
                           _GameCard(
                             icon: Icons.filter_5,
-                            title: "GAME 5",
-                            subtitle: "Coming Soon",
+                            title: "HAMPANG 5",
+                            subtitle: "Maabot pa",
                             color: Colors.teal,
                             onTap: () {},
                           ),

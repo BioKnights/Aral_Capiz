@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/tourist_spots/roxas_city/cathedral_screen.dart';
+import 'package:language_game/screen/codex/culture&tradition/cuartero/agdahanay.dart';
+import 'package:language_game/screen/codex/culture&tradition/cuartero/embroidery.dart';
+import 'package:language_game/screen/codex/culture&tradition/cuartero/cuartero_house.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class RoxasCityScreen extends StatelessWidget {
-  const RoxasCityScreen({super.key});
+class CuarteroCultureScreen extends StatelessWidget {
+  const CuarteroCultureScreen({super.key});
 
   static const _items = [
     {
-      "title": "Metropolitan Cathedral",
-      "image": "assets/images/roxas_cathedral.jpg",
-      "screen": CathedralScreen(),
+      "title": "Agdahanay Festival",
+      "image": "assets/images/municipal_hall(cuartero).jpg",
+      "screen": AgdahanayFestivalScreen(),
     },
     {
       "title": "Traditional Embroidery of Cuartero",
       "image": "assets/images/traditional embdroidery (cuartero).jpg",
+      "screen": EmbroideryScreen(),
     },
     {
-      "title": "Traditional Embroidery of Cuartero",
-      "image": "assets/images/traditional embdroidery (02) (cuartero).jpg",
-    },
-    {
-      "title": "The Ruins of Alcatraz",
-      "image": "assets/images/ruin.jpg",
+      "title": "Eco-Park Village Cuartero",
+      "image": "assets/images/hut_(cuartero).jpg",
+      "screen": CulturalHousesScreen(),
     }
   ];
 
@@ -41,7 +41,7 @@ class RoxasCityScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Municipality of Cuartero"),
+          title: const Text("Cuartero Culture & Tradition"),
           centerTitle: true,
         ),
         body: GridView.builder(

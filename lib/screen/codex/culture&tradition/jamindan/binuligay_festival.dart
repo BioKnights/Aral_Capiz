@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:styled_text/styled_text.dart';
 import '/services/animated_background.dart';
 
-class Bitch extends StatelessWidget {
-  const Bitch({super.key});
+class JamindanFestivalScreen extends StatelessWidget {
+  const JamindanFestivalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +14,7 @@ class Bitch extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.black54,
-          title: const Text("Bitch house"),
+          title: const Text("Jamindan Binuligay Festival"),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -21,32 +22,25 @@ class Bitch extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🖼 Image (Responsive)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(18),
                   child: Image.asset(
-                    "assets/images/ivisan_beach.jpg",
+                    "assets/images/binuligay_festival_jamindan.jpg",
                     width: double.infinity,
                     height: size.width > 600 ? 320 : 220,
                     fit: BoxFit.cover,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // 🏛 Title
                 const Text(
-                  "Bitch house sang mga kaplog",
+                  "Jamindan Binuligay Festival",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
-                // 📜 Description Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -54,17 +48,19 @@ class Bitch extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.white24),
                   ),
-                  child: const Text(
-                    "1701, Roxas City (formerly Capiz, Capiz)\n\n"
-                    "Si dave abay bulay og "
-                    "Pope Pius XII, Ex Supreme Apostolus, on May 28, 1951. "
-                    "It became a suffragan of the Archdiocese of Jaro.\n\n"
-                    "Most Rev. Manuel P. Yap, DD served as the first bishop.",
-                    style: TextStyle(
+                  child: StyledText(
+                    text: "Binuligay Festival is set on January 10-20, in Jamindan, Capiz. \"Binuligay\" is Jamindanganon word for \"Bayanihan\"\n"
+                          "the spirit of cooperation and shared responsibility. Binuligay Fiesta is celebrated with street dancing, fun run, food festival\n"
+                          "and highlighted with Pangahaw Presentation on the 19th of January. It brings the community together in a colorful celebration of unity,\n"
+                          "gratitude, and shared heritage. It is also held in honor of the town\'s patron, Sr. San Sebastian.\n\n",
+                    style: const TextStyle(
                       fontSize: 16,
                       height: 1.6,
                       color: Colors.white70,
                     ),
+                    tags: {
+                      'i': StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
+                    },
                   ),
                 ),
               ],

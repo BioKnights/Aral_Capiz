@@ -18,11 +18,11 @@ class _MascotWidgetState extends State<MascotWidget>
   late String _currentTip;
 
   final List<String> _tips = [
-    "Tara! Mag tuon kita! 🦀",
-    "Practice everyday para mag level up! ⭐",
-    "Tap the game icon para mag play 🎮",
-    "Learn Capiznon step by step 💡",
-    "Indi mag surrender! Kaya mo ini 💪",
+  "Dali na! Magpanikasog kita sa pagtuon! ",
+  "Padayon sa pagsanay agud mangin madinalag-on! ",
+  "Pinduta ang hulagway sang dula agud magbukas ",
+  "Hibaloi ang Capiznon paagi sa mapisan nga paghangop ",
+  "Indi magtalaw! Ikaw ang may kusog kag ikasarang ",
   ];
 
   @override

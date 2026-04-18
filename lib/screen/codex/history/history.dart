@@ -98,7 +98,7 @@ final List<_CultureItem> _cultureItems = [
     onTap: (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const IvisanHistory()),
+        MaterialPageRoute(builder: (_) => const IvisanHistoryScreen()),
       );
     },
   ),
@@ -112,11 +112,11 @@ final List<_CultureItem> _cultureItems = [
   ),
   _CultureItem(
     title: "Cuartero",
-    image: "assets/images/agdahanay_festival_02_(cuartero).jpg",
+    image: "assets/images/municipal_hall(cuartero).jpg",
     onTap: (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CuarteroHistory()),
+        MaterialPageRoute(builder: (_) => const CuarteroHistoryScreen()),
       );
     },
   ),

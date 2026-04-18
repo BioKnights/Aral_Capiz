@@ -7,11 +7,14 @@ import 'package:language_game/services/firebase_leaderboard_service.dart';
 import 'package:language_game/services/user_session.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/ad_service.dart';
+import 'package:language_game/screen/Games/games_screen.dart';
 
 class FlipCard {
   final String text, pair;
   bool flipped, matched;
-  FlipCard(this.text, this.pair, {this.flipped = false, this.matched = false});
+
+  FlipCard(this.text, this.pair,
+      {this.flipped = false, this.matched = false});
 }
 
 class GameOne extends StatefulWidget {
@@ -44,47 +47,55 @@ class _GameOneState extends State<GameOne> {
   bool win = false;
   bool lose = false;
   bool shuffling = true;
-  bool isFinished = false;
 
-final words = {
-  "LOOK": "Lantaw",
-  "RUN": "Dalagan",
-  "SIT": "Pungku",
-  "STAND": "Tindog",
-  "CRY": "Hibi",
-  "LAUGH": "Kadlaw",
-  "ANGRY": "Akig",
-  "HAPPY": "Lipay",
-  "SAD": "Subo",
-  "FAST": "Dasig",
-  "SLOW": "Hinay",
-  "TIRED": "Kapoy",
-  "SLEEP": "Tulog",
-  "WAKE UP": "Bugtaw",
-  "HOT": "Init",
-  "COLD": "Tugnaw",
-  "BIG": "Daku",
-  "SMALL": "Diotay",
-  "NEAR": "Lapit",
-  "FAR": "Layo",
-  "INSIDE": "Sulod",
-  "OUTSIDE": "Gwa",
-  "COME": "Kari",
-  "GO": "Kadto",
-  "BUY": "Bakal",
-  "SELL": "Baligya",
-  "BAD": "Malain",
-  "FRIEND": "Abyan",
-  "ENEMY": "Kaaway",
-  "ROAD": "Dalan",
-  "MONEY": "Kwarta",
-  "WORK": "Ubra",
-  "REST": "Pahuway",
-  "HELP": "Bulig",
-  "ASK": "Pamangkot",
-  "ANSWER": "Sabat",
-};
+  // =========================
+  // 🏆 ACHIEVEMENTS (6 ONLY)
+  // =========================
+  final String aFirstFlip = "first_flip";
+  final String aFirstMatch = "first_match";
+  final String aStreak5 = "streak_5";
+  final String aStreak10 = "streak_10";
+  final String aWin = "win_game";
+  final String aLose = "lose_game";
 
+  final words = {
+    "LOOK": "Lantaw",
+    "RUN": "Dalagan",
+    "SIT": "Pungku",
+    "STAND": "Tindog",
+    "CRY": "Hibi",
+    "LAUGH": "Kadlaw",
+    "ANGRY": "Akig",
+    "HAPPY": "Lipay",
+    "SAD": "Subo",
+    "FAST": "Dasig",
+    "SLOW": "Hinay",
+    "TIRED": "Kapoy",
+    "SLEEP": "Tulog",
+    "WAKE UP": "Bugtaw",
+    "HOT": "Init",
+    "COLD": "Tugnaw",
+    "BIG": "Daku",
+    "SMALL": "Diotay",
+    "NEAR": "Lapit",
+    "FAR": "Layo",
+    "INSIDE": "Sulod",
+    "OUTSIDE": "Gwa",
+    "COME": "Kari",
+    "GO": "Kadto",
+    "BUY": "Bakal",
+    "SELL": "Baligya",
+    "BAD": "Malain",
+    "FRIEND": "Abyan",
+    "ENEMY": "Kaaway",
+    "ROAD": "Dalan",
+    "MONEY": "Kwarta",
+    "WORK": "Ubra",
+    "REST": "Pahuway",
+    "HELP": "Bulig",
+    "ASK": "Pamangkot",
+    "ANSWER": "Sabat",
+  };
 
   int pairsForLevel() {
     if (level <= 3) return 6;
@@ -107,9 +118,7 @@ final words = {
   @override
   void initState() {
     super.initState();
-
     AdService.loadAd();
-
     Future.microtask(() => start(reset: true));
   }
 
@@ -162,13 +171,14 @@ final words = {
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (--time <= 0) {
         timer?.cancel();
-        setState(() {         
+
+        AchievementService.unlock(context, aLose);
+
+        setState(() {
           lose = true;
-          isFinished = true;
         });
 
-        widget.onFinish(score); // ⭐ ADD HERE
-        
+        widget.onFinish(score);
         AdService.showAd();
       }
       setState(() {});
@@ -195,7 +205,9 @@ final words = {
     if (lock || shuffling || c.flipped || c.matched) return;
 
     playSound('audio/flip.mp3');
-    AchievementService.unlock(context, "first_flip");
+
+    // 🟢 FIRST FLIP
+    AchievementService.unlock(context, aFirstFlip);
 
     setState(() => c.flipped = true);
 
@@ -208,7 +220,6 @@ final words = {
 
     if (first!.pair == c.pair) {
       playSound('audio/match.mp3');
-      AchievementService.unlock(context, "first_match");
 
       first!.matched = true;
       c.matched = true;
@@ -216,34 +227,43 @@ final words = {
       score++;
       streak++;
       maxStreak = max(maxStreak, streak);
-      UserSession.addXp(10);
 
-if (cards.every((x) => x.matched)) {
-  win = true;
-  timer?.cancel();
+      // 🟢 FIRST MATCH
+      AchievementService.unlock(context, aFirstMatch);
 
-  stars = 3;
+      // ⭐ STREAK ACHIEVEMENTS
+      if (streak == 5) {
+        AchievementService.unlock(context, aStreak5);
+      }
+      if (streak == 10) {
+        AchievementService.unlock(context, aStreak10);
+      }
 
-  widget.onFinish(score); // ⭐ ADD HERE (VERY IMPORTANT)
+      if (cards.every((x) => x.matched)) {
+        win = true;
+        timer?.cancel();
+        stars = 3;
 
-  AchievementService.unlock(context, "TAPOS KA ANGAY GID");
+        AchievementService.unlock(context, aWin);
 
-  playSound('audio/win.mp3');
+        widget.onFinish(score);
+        playSound('audio/win.mp3');
 
-  AdService.showAd();
+        AdService.showAd();
 
-  FirebaseLeaderboardService.saveScore(
-    "matching_leaderboard",
-    UserSession.displayName ?? "Guest",
-    score,
-  );
-}
+        FirebaseLeaderboardService.saveScore(
+          "matching_leaderboard",
+          UserSession.displayName ?? "Guest",
+          score,
+        );
+      }
 
       first = null;
       lock = false;
       setState(() {});
     } else {
       streak = 0;
+
       Future.delayed(const Duration(milliseconds: 700), () {
         first!.flipped = false;
         c.flipped = false;
@@ -302,33 +322,50 @@ if (cards.every((x) => x.matched)) {
     );
   }
 
-  Widget overlay() => Container(
-        color: Colors.black87,
-        child: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text(
-              "TAPOS KA ANGAY GID! 🎉",
-              style: TextStyle(fontSize: 28, color: Colors.white),
+  Widget endGameOverlay({required bool isWin}) {
+    return Container(
+      color: Colors.black87,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isWin ? "DAUG KA NA! 🎉" : "HUMAN NA GAME 😢",
+              style: const TextStyle(fontSize: 28, color: Colors.white),
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                stars,
-                (_) => const Icon(Icons.star, color: Colors.amber, size: 32),
+            if (isWin)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  stars,
+                  (_) => const Icon(Icons.star, color: Colors.amber, size: 32),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
             ElevatedButton(
-              onPressed: () {
-                level++;
-                start();
-              },
-              child: const Text("NEXT LEVEL"),
+              onPressed: () => start(reset: true),
+              child: const Text("PLAY AGAIN"),
             ),
-          ]),
+            const SizedBox(height: 10),
+            if (isWin)
+              ElevatedButton(
+                onPressed: () {
+                  level++;
+                  start();
+                },
+                child: const Text("NEXT LEVEL"),
+              ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("EXIT"),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -338,9 +375,18 @@ if (cards.every((x) => x.matched)) {
           backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.black54,
-            title: const Text("🧠 Memory Game"),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const GameScreen()),
+                );
+              },
+            ),
+            title: const Text("🧠 Hampang Memorya"),
             actions: [
-              Center(child: Text("Level $level")),
+              Center(child: Text("Antas $level")),
               const SizedBox(width: 16),
               Center(child: Text("⏱ $time")),
               const SizedBox(width: 12),
@@ -359,9 +405,11 @@ if (cards.every((x) => x.matched)) {
                       const spacing = 10.0;
 
                       final cardW =
-                          (constraints.maxWidth - spacing * (cols - 1)) / cols;
+                          (constraints.maxWidth - spacing * (cols - 1)) /
+                              cols;
                       final cardH =
-                          (constraints.maxHeight - spacing * (rows - 1)) / rows;
+                          (constraints.maxHeight - spacing * (rows - 1)) /
+                              rows;
 
                       final fontSize = min(cardW, cardH) * 0.28;
 
@@ -392,14 +440,8 @@ if (cards.every((x) => x.matched)) {
                   ),
                 ),
               ),
-              if (win) overlay(),
-              if (lose)
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () => start(reset: true),
-                    child: const Text("GAME OVER – TRY AGAIN"),
-                  ),
-                ),
+              if (win) endGameOverlay(isWin: true),
+              if (lose) endGameOverlay(isWin: false),
             ],
           ),
         ),
