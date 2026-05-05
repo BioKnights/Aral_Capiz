@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/jamindan/jamindan_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/jamindan/jamindan_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class JamindanHistoryScreen extends StatelessWidget {
-  const JamindanHistoryScreen({super.key});
+class JamindanHistory extends StatelessWidget {
+  const JamindanHistory({super.key});
 
   static const _items = [
     {
       "title": "Jamindan",
       "image": "assets/images/jamindan.jpg",
-      "screen": JamindanMunicipalScreen(),
+      "screen": JamindanOrigin(),
     },
   ];
 

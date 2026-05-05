@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'world_chat_tab.dart';
 import 'friends_chat_tab.dart';
-import 'chat_dialog.dart'; // ⭐ ADD NI
+import 'chat_dialog.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD NI
 
 class ChatPanel extends StatefulWidget {
   const ChatPanel({super.key});
@@ -28,7 +29,7 @@ class _ChatPanelState extends State<ChatPanel> {
     );
   }
 
-  // 🔘 COLLAPSED (WITH RED DOT 🔥)
+  // 🔘 COLLAPSED
   Widget _collapsedButton() {
     return Stack(
       children: [
@@ -36,12 +37,29 @@ class _ChatPanelState extends State<ChatPanel> {
           child: IconButton(
             icon: const Icon(Icons.chat, color: Colors.white),
 
-            // ⭐⭐⭐ NEW MERGED LOGIC ⭐⭐⭐
             onPressed: () {
-              // 👉 optional kung gusto mo gyapon expand mode
-              // setState(() => isOpen = true);
 
-              // ⭐ modal popup
+              /// 🖥️ DESKTOP MODE → BLOCK FIREBASE
+              if (PlatformHelper.isDesktop) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Chat"),
+                    content: const Text(
+                      "Chat is not available on desktop 💻\nUse Android for online chat.",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("OK"),
+                      )
+                    ],
+                  ),
+                );
+                return;
+              }
+
+              /// 📱 MOBILE → OPEN REAL CHAT
               showGeneralDialog(
                 context: context,
                 barrierDismissible: true,
@@ -58,7 +76,7 @@ class _ChatPanelState extends State<ChatPanel> {
           ),
         ),
 
-        // 🔴 NOTIFICATION DOT
+        // 🔴 DOT
         Positioned(
           right: 10,
           top: 10,
@@ -79,7 +97,6 @@ class _ChatPanelState extends State<ChatPanel> {
   Widget _expandedChat() {
     return Column(
       children: [
-        // 🔝 HEADER
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -99,10 +116,39 @@ class _ChatPanelState extends State<ChatPanel> {
         const Divider(color: Colors.white24),
 
         Expanded(
-          child: selectedTab == 0 ? WorldChatTab() : FriendsChatTab(),
+          child: selectedTab == 0
+              ? _safeWorld()
+              : _safeFriends(),
         ),
       ],
     );
+  }
+
+  /// 🔒 SAFE WRAPPERS
+  Widget _safeWorld() {
+    if (PlatformHelper.isDesktop) {
+      return const Center(
+        child: Text(
+          "Offline Mode 💻\nWorld chat unavailable",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
+    }
+    return WorldChatTab();
+  }
+
+  Widget _safeFriends() {
+    if (PlatformHelper.isDesktop) {
+      return const Center(
+        child: Text(
+          "Offline Mode 💻\nFriends chat unavailable",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
+    }
+    return FriendsChatTab();
   }
 
   Widget _tab(String title, int index) {

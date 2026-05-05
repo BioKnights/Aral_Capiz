@@ -29,7 +29,7 @@ class DumalagTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("St. Martin of Tours Parish Church"),
+          title: const Text("Dumalag"),
           centerTitle: true,
         ),
         body: GridView.builder(

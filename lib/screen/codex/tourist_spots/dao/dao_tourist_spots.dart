@@ -29,7 +29,7 @@ class DaoTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Lolet\'s Eco-Park Dao"),
+          title: const Text("Dao"),
           centerTitle: true,
         ),
         body: GridView.builder(

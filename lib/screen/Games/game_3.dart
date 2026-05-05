@@ -1,246 +1,428 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:language_game/services/user_session.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:language_game/services/animated_background.dart';
 import 'package:language_game/services/achievement_service.dart';
-import 'package:language_game/services/ad_service.dart';
 import 'package:language_game/services/firebase_leaderboard_service.dart';
+import 'package:language_game/services/user_session.dart';
+import 'package:language_game/services/ad_service.dart';
 
-class GameThree extends StatefulWidget {
-  final Future<bool> Function() onBack;
+class GameTwo extends StatefulWidget {
+  final Function(int) onFinish;
 
-  const GameThree({
-    super.key,
-    required this.onBack,
-  });
+  const GameTwo({super.key, required this.onFinish});
 
   @override
-  State<GameThree> createState() => _GameThreeState();
+  State<GameTwo> createState() => _GameTwoState();
 }
 
-class _GameThreeState extends State<GameThree> {
-  static const int maxLives = 5;
-  static const int timePerQuestion = 10;
-
-  int lives = maxLives;
-  int level = 1;
-  int score = 0;
-  int timeLeft = timePerQuestion;
-
-  Timer? timer;
-
-  late Map<String, String> currentQuestion;
-  late List<String> choices;
-
-  final Random _random = Random();
-
-  final List<Map<String, String>> words = [
-    {"word": "Dalagan", "answer": "Hiligaynon"},
-    {"word": "Lagan", "answer": "Ilonggo"},
-    {"word": "Panag", "answer": "Aklanon"},
-    {"word": "Karakas", "answer": "Kinaray-a"},
-    {"word": "Lantaw", "answer": "Hiligaynon"},
-    {"word": "Tan-aw", "answer": "Ilonggo"},
-    {"word": "Sulok", "answer": "Kinaray-a"},
-  ];
-
-  final List<String> languages = [
-    "Hiligaynon",
-    "Ilonggo",
-    "Aklanon",
-    "Kinaray-a",
-  ];
+class _GameTwoState extends State<GameTwo> {
+  final AudioPlayer player = AudioPlayer();
+  bool soundOn = true;
 
   @override
   void initState() {
     super.initState();
-
+    loadLevel();
     AdService.loadAd();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _nextQuestion();
   }
 
-  void _startTimer() {
-    timer?.cancel();
-    timeLeft = timePerQuestion;
+  final List<Map<String, dynamic>> questions = [
+    {
+      "sentence": "\"LOOK\" in Hiligaynon is",
+      "answer": "Lantaw",
+      "options": ["Lantaw", "Dalagan", "Pungku", "Tindog"],
+    },
+    {
+      "sentence": "\"RUN\" in Hiligaynon is",
+      "answer": "Dalagan",
+      "options": ["Dalagan", "Pahuway", "Tulog", "Lantaw"],
+    },
+    {
+      "sentence": "\"SIT\" in Hiligaynon is",
+      "answer": "Pungku",
+      "options": ["Pungku", "Tindog", "Kadto", "Bugtaw"],
+    },
+    {
+      "sentence": "\"STAND\" in Hiligaynon is",
+      "answer": "Tindog",
+      "options": ["Tindog", "Pungku", "Hibi", "Kadlaw"],
+    },
+    {
+      "sentence": "\"CRY\" in Hiligaynon is",
+      "answer": "Hibi",
+      "options": ["Hibi", "Kadlaw", "Akig", "Lipay"],
+    },
+    {
+      "sentence": "\"LAUGH\" in Hiligaynon is",
+      "answer": "Kadlaw",
+      "options": ["Kadlaw", "Hibi", "Subo", "Kapoy"],
+    },
+    {
+      "sentence": "\"ANGRY\" in Hiligaynon is",
+      "answer": "Akig",
+      "options": ["Akig", "Lipay", "Subo", "Hinay"],
+    },
+    {
+      "sentence": "\"HAPPY\" in Hiligaynon is",
+      "answer": "Lipay",
+      "options": ["Lipay", "Akig", "Kapoy", "Bugtaw"],
+    },
+    {
+      "sentence": "\"SAD\" in Hiligaynon is",
+      "answer": "Subo",
+      "options": ["Subo", "Lipay", "Dasig", "Init"],
+    },
+    {
+      "sentence": "\"FAST\" in Hiligaynon is",
+      "answer": "Dasig",
+      "options": ["Dasig", "Hinay", "Bug-at", "Lanay"],
+    },
+    {
+      "sentence": "\"SLOW\" in Hiligaynon is",
+      "answer": "Hinay",
+      "options": ["Hinay", "Dasig", "Init", "Tugnaw"],
+    },
+    {
+      "sentence": "\"TIRED\" in Hiligaynon is",
+      "answer": "Kapoy",
+      "options": ["Kapoy", "Bugtaw", "Lipay", "Kadto"],
+    },
+    {
+      "sentence": "\"SLEEP\" in Hiligaynon is",
+      "answer": "Tulog",
+      "options": ["Tulog", "Bugtaw", "Dalagan", "Pungku"],
+    },
+    {
+      "sentence": "\"WAKE UP\" in Hiligaynon is",
+      "answer": "Bugtaw",
+      "options": ["Bugtaw", "Tulog", "Pahuway", "Higda"],
+    },
+    {
+      "sentence": "\"HOT\" in Hiligaynon is",
+      "answer": "Init",
+      "options": ["Init", "Tugnaw", "Dasig", "Hinay"],
+    },
+    {
+      "sentence": "\"COLD\" in Hiligaynon is",
+      "answer": "Tugnaw",
+      "options": ["Tugnaw", "Init", "Daku", "Diotay"],
+    },
+    {
+      "sentence": "\"BIG\" in Hiligaynon is",
+      "answer": "Daku",
+      "options": ["Daku", "Diotay", "Lapit", "Layo"],
+    },
+    {
+      "sentence": "\"SMALL\" in Hiligaynon is",
+      "answer": "Diotay",
+      "options": ["Diotay", "Daku", "Sulod", "Gwa"],
+    },
+    {
+      "sentence": "\"NEAR\" in Hiligaynon is",
+      "answer": "Lapit",
+      "options": ["Lapit", "Layo", "Sulod", "Gwa"],
+    },
+    {
+      "sentence": "\"FAR\" in Hiligaynon is",
+      "answer": "Layo",
+      "options": ["Layo", "Lapit", "Dasig", "Hinay"],
+    },
+    {
+      "sentence": "\"INSIDE\" in Hiligaynon is",
+      "answer": "Sulod",
+      "options": ["Sulod", "Gwa", "Lapit", "Layo"],
+    },
+    {
+      "sentence": "\"OUTSIDE\" in Hiligaynon is",
+      "answer": "Gwa",
+      "options": ["Gwa", "Sulod", "Init", "Tugnaw"],
+    },
+    {
+      "sentence": "\"COME\" in Hiligaynon is",
+      "answer": "Kari",
+      "options": ["Kari", "Kadto", "Lakat", "Paadto"],
+    },
+    {
+      "sentence": "\"GO\" in Hiligaynon is",
+      "answer": "Kadto",
+      "options": ["Kadto", "Kari", "Pahuway", "Tulog"],
+    },
+    {
+      "sentence": "\"BUY\" in Hiligaynon is",
+      "answer": "Bakal",
+      "options": ["Bakal", "Baligya", "Kwarta", "Ubra"],
+    },
+    {
+      "sentence": "\"SELL\" in Hiligaynon is",
+      "answer": "Baligya",
+      "options": ["Baligya", "Bakal", "Kwarta", "Salapi"],
+    },
+    {
+      "sentence": "\"BAD\" in Hiligaynon is",
+      "answer": "Malain",
+      "options": ["Malain", "Lipay", "Dasig", "Hinay"],
+    },
+    {
+      "sentence": "\"FRIEND\" in Hiligaynon is",
+      "answer": "Abyan",
+      "options": ["Abyan", "Kaaway", "Upod", "Kontra"],
+    },
+    {
+      "sentence": "\"ENEMY\" in Hiligaynon is",
+      "answer": "Kaaway",
+      "options": ["Kaaway", "Abyan", "Higala", "Kasimanwa"],
+    },
+    {
+      "sentence": "\"ROAD\" in Hiligaynon is",
+      "answer": "Dalan",
+      "options": ["Dalan", "Balay", "Sulod", "Gwa"],
+    },
+    {
+      "sentence": "\"MONEY\" in Hiligaynon is",
+      "answer": "Kwarta",
+      "options": ["Kwarta", "Ubra", "Bakal", "Baligya"],
+    },
+    {
+      "sentence": "\"WORK\" in Hiligaynon is",
+      "answer": "Ubra",
+      "options": ["Ubra", "Pahuway", "Tulog", "Bugtaw"],
+    },
+    {
+      "sentence": "\"REST\" in Hiligaynon is",
+      "answer": "Pahuway",
+      "options": ["Pahuway", "Ubra", "Dalagan", "Dasig"],
+    },
+    {
+      "sentence": "\"HELP\" in Hiligaynon is",
+      "answer": "Bulig",
+      "options": ["Bulig", "Tabang", "Sabat", "Pamangkot"],
+    },
+    {
+      "sentence": "\"ASK\" in Hiligaynon is",
+      "answer": "Pamangkot",
+      "options": ["Pamangkot", "Sabat", "Bulig", "Ubra"],
+    },
+    {
+      "sentence": "\"ANSWER\" in Hiligaynon is",
+      "answer": "Sabat",
+      "options": ["Sabat", "Pamangkot", "Bulig", "Tabang"],
+    },
+  ];
 
-    timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      setState(() {
-        timeLeft--;
+  int level = 1;
+  int questionsPerLevel = 3;
+  List<Map<String, dynamic>> currentQuestions = [];
 
-        if (timeLeft <= 0) {
-          _wrongAnswer();
-        }
-      });
-    });
+  int index = 0;
+  int score = 0;
+  bool checked = false;
+  bool correct = false;
+  bool saved = false;
+  String? selectedWord;
+
+  int combo = 0;
+
+  int get maxRounds => questionsPerLevel;
+
+  void loadLevel() {
+    questions.shuffle();
+
+    int difficulty = (level ~/ 5);
+    int start = difficulty * 3;
+
+    if (start >= questions.length) {
+      start = 0;
+    }
+
+    currentQuestions = questions.skip(start).take(questionsPerLevel).toList();
+
+    if (currentQuestions.length < questionsPerLevel) {
+      currentQuestions = questions.take(questionsPerLevel).toList();
+    }
+
+    index = 0;
+    score = 0;
+    selectedWord = null;
+    checked = false;
+    correct = false;
+    saved = false;
+    combo = 0;
   }
 
-  void _nextQuestion() {
-    currentQuestion = words[_random.nextInt(words.length)];
-    choices = List<String>.from(languages)..shuffle();
-    _startTimer();
+  Future<void> playSound(String asset) async {
+    if (!soundOn) return;
+    await player.play(AssetSource(asset)).catchError((_) {});
+  }
+
+  void restart() {
+    level = 1;
+    loadLevel();
     setState(() {});
   }
 
-  void _checkAnswer(String choice) {
-    timer?.cancel();
-
-    if (choice == currentQuestion["answer"]) {
-      score += 10;
+  void nextLevel() {
+    if (level < 20) {
       level++;
-      _nextQuestion();
+      loadLevel();
+      setState(() {});
+    }
+  }
+
+  void selectWord(String word) {
+    if (checked) return;
+    setState(() => selectedWord = word);
+  }
+
+  // 🔥 MERGED CHECK ANSWER WITH ACHIEVEMENTS
+  void checkAnswer() async {
+    if (selectedWord == null) return;
+
+    final answer = currentQuestions[index]["answer"];
+    correct = selectedWord == answer;
+
+    if (correct) {
+      combo++;
+      score += 1 + combo;
+
+      // 🏆 ACHIEVEMENTS
+      AchievementService.unlock(context, "fill_blank_first");
+
+      if (score >= 3) {
+        AchievementService.unlock(context, "fill_blank_3_correct");
+      }
+
+      if (combo >= 3) {
+        AchievementService.unlock(context, "fill_blank_combo_3");
+      }
+
+      if (combo >= 5) {
+        AchievementService.unlock(context, "fill_blank_combo_5");
+      }
+
+      if (combo >= 2) {
+        AchievementService.unlock(context, "fill_blank_speed");
+      }
+
+      UserSession.addXp(10);
+      await playSound("audio/correct.mp3");
     } else {
-      _wrongAnswer();
-    }
-  }
-
-  void _wrongAnswer() {
-    timer?.cancel();
-    lives--;
-
-    if (lives <= 0) {
-      _gameOver();
-    } else {
-      _nextQuestion();
-    }
-  }
-
-  void _gameOver() {
-    if (score >= 30) {
-      AdService.showAd();
+      combo = 0;
+      await playSound("audio/wrong.mp3");
     }
 
-    FirebaseLeaderboardService.saveScore(
-      "guess_language_leaderboard",
-      UserSession.displayName ?? "Guest",
-      score,
-    );
+    setState(() => checked = true);
 
-    bool unlockedSomething = false;
-
-    if (score >= 50) {
-      AchievementService.unlock(context, "first_win");
-      AchievementService.addExp(20);
-      unlockedSomething = true;
-    }
-
-    if (level >= 5) {
-      AchievementService.unlock(context, "speed_runner");
-      AchievementService.addExp(30);
-      unlockedSomething = true;
-    }
-
-    if (unlockedSomething) {
-      AchievementService.showPopup(context);
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Game Over"),
-        content: Text("Score: $score\nLevel Reached: $level"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _restart();
-            },
-            child: const Text("Try Again"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text("Main Menu"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _restart() {
-    setState(() {
-      lives = maxLives;
-      score = 0;
-      level = 1;
+    Future.delayed(const Duration(seconds: 1), () {
+      index++;
+      selectedWord = null;
+      checked = false;
+      correct = false;
+      setState(() {});
     });
-    _nextQuestion();
   }
 
-  @override
-  void dispose() {
-    timer?.cancel();
-    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-    super.dispose();
+  int getStarCount() {
+    final percent = score / maxRounds;
+    if (percent >= 1.0) return 3;
+    if (percent >= 0.7) return 2;
+    if (percent >= 0.4) return 1;
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (index >= maxRounds) {
+      if (!saved) {
+        saved = true;
+
+        // 🏆 PERFECT ACHIEVEMENT
+        if (score == maxRounds) {
+          AchievementService.unlock(context, "fill_blank_perfect");
+        }
+
+        playSound("audio/win.mp3");
+        AdService.showAd();
+
+        FirebaseLeaderboardService.saveScore(
+          "fill_blank_leaderboard",
+          UserSession.displayName ?? "Guest",
+          score,
+        );
+      }
+
+      final stars = getStarCount();
+
+      return AnimatedBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("🎉 Level $level Complete!",
+                    style: const TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                      3,
+                      (i) => Icon(
+                            i < stars ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 40,
+                          )),
+                ),
+                const SizedBox(height: 16),
+                Text("Score: $score / $maxRounds",
+                    style: const TextStyle(fontSize: 20, color: Colors.white)),
+                const SizedBox(height: 32),
+                ElevatedButton(onPressed: restart, child: const Text("RESTART")),
+                ElevatedButton(
+                    onPressed: nextLevel,
+                    child: const Text("NEXT LEVEL")),
+                ElevatedButton(
+                    onPressed: () {
+                      widget.onFinish(score);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("MAIN MENU")),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final q = currentQuestions[index];
+
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Guess the Language"),
-          backgroundColor: Colors.deepPurple.withOpacity(0.7),
-
-          // ✅ BACK BUTTON CONNECTED
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              final shouldExit = await widget.onBack();
-              if (shouldExit) Navigator.pop(context);
-            },
-          ),
+          backgroundColor: Colors.black54,
+          title: Text("Level $level"),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
+        body: Center(
           child: Column(
             children: [
-              _topBar(),
-              const SizedBox(height: 30),
-
-              Text(
-                currentQuestion["word"] ?? "",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
+              Text("${q["sentence"]} _____"),
+              Wrap(
+                children: q["options"]
+                    .map<Widget>((word) => ChoiceChip(
+                          label: Text(word),
+                          selected: selectedWord == word,
+                          onSelected: (_) => selectWord(word),
+                        ))
+                    .toList(),
               ),
-
-              const SizedBox(height: 30),
-
-              ...choices.map(
-                (c) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: ElevatedButton(
-                    onPressed: () => _checkAnswer(c),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 55),
-                    ),
-                    child: Text(c),
-                  ),
-                ),
-              ),
+              ElevatedButton(onPressed: checkAnswer, child: Text("CHECK"))
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _topBar() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text("❤️ $lives", style: const TextStyle(color: Colors.white)),
-        Text("⏱ $timeLeft", style: const TextStyle(color: Colors.white)),
-        Text("⭐ $score", style: const TextStyle(color: Colors.white)),
-      ],
     );
   }
 }

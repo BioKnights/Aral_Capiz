@@ -1,16 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/folklore/dao/dao.dart';
+import 'package:language_game/screen/codex/folklore/dumarao/dumarao.dart';
+import 'package:language_game/screen/codex/folklore/jamindan/jamindan.dart';
+import 'package:language_game/screen/codex/folklore/maayon/maayon.dart';
+import 'package:language_game/screen/codex/folklore/mambusao/mambusao.dart';
+import 'package:language_game/screen/codex/folklore/panay/panay.dart';
+import 'package:language_game/screen/codex/folklore/panit-an/panit-an.dart';
+import 'package:language_game/screen/codex/folklore/pilar/pilar.dart';
+import 'package:language_game/screen/codex/folklore/pontevedra/pontevedra.dart';
+import 'package:language_game/screen/codex/folklore/president_roxas/president_roxas.dart';
+import 'package:language_game/screen/codex/folklore/roxas_city/roxas_city.dart';
+import 'package:language_game/screen/codex/folklore/sapian/sapian.dart';
+import 'package:language_game/screen/codex/folklore/sigma/sigma.dart';
+import 'package:language_game/screen/codex/folklore/tapaz/tapaz.dart';
 import '../../../widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/tourist_spots/roxas_city/roxas_city_screen.dart';
+import 'package:language_game/screen/codex/folklore/cuartero/cuartero.dart';
+import 'package:language_game/screen/codex/folklore/dumalag/dumalag.dart';
+import 'package:language_game/screen/codex/folklore/ivisan/ivisan.dart';
 import '../../../services/animated_background.dart';
 
-class Folklore extends StatelessWidget {
-  const Folklore({super.key});
+class FolkloreScreen extends StatelessWidget {
+  const FolkloreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // 🔥 RESPONSIVE COLUMN COUNT
     int crossAxisCount = 2;
     if (size.width > 900) {
       crossAxisCount = 4;
@@ -28,7 +43,7 @@ class Folklore extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Tourist Spots"),
+          title: const Text("Folklore"),
           centerTitle: true,
         ),
 
@@ -48,14 +63,7 @@ class Folklore extends StatelessWidget {
               return CultureCard(
                 title: item.title,
                 imagePath: item.image,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => item.screen,
-                    ),
-                  );
-                },
+                onTap: item.onTap != null ? () => item.onTap!(context) : () {},
               );
             },
           ),
@@ -70,12 +78,12 @@ class Folklore extends StatelessWidget {
 class _CultureItem {
   final String title;
   final String image;
-  final Widget screen;
+  final Function(BuildContext context)? onTap;
 
   _CultureItem({
     required this.title,
     required this.image,
-    required this.screen,
+    this.onTap,
   });
 }
 
@@ -83,58 +91,173 @@ class _CultureItem {
 
 final List<_CultureItem> _cultureItems = [
   _CultureItem(
-    title: "Roxas City",
-    image: "assets/images/roxas_city.jpg",
-    screen: const RoxasCityScreen(),
+    title: "Cuartero",
+    image: "assets/images/municipal_hall(cuartero).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CuarteroFolkloreScreen()),
+      );
+    },
   ),
   _CultureItem(
-    title: "Sigma",
-    image: "assets/images/sigma.jpg",
-    screen: const ComingSoonScreen(title: "Sigma"),
+    title: "Dao",
+    image: "assets/images/dao_municipality_(dao).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DaoFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Dumalag",
+    image: "assets/images/dumalag_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DumalagFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Dumarao",
+    image: "assets/images/dumarao_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DumaraoFolkloreScreen()),
+      );
+    },
   ),
   _CultureItem(
     title: "Ivisan",
-    image: "assets/images/roxas_cathedral.jpg",
-    screen: const ComingSoonScreen(title: "Ivisan"),
+    image: "assets/images/ivisan_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const IvisanFolkloreScreen()),
+      );
+    },
   ),
   _CultureItem(
-    title: "Pontevedra",
-    image: "assets/images/roxas_cathedral.jpg",
-    screen: const ComingSoonScreen(title: "Pontevedra"),
+    title: "Jamindan",
+    image: "assets/images/binuligay_festival_jamindan.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const JamindanFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Maayon",
+    image: "assets/images/maayon_municipal_hall.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MaayonFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Mambusao",
+    image: "assets/images/mambusao_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MambusaoFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Panay",
+    image: "assets/images/ivisan_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PanayFolkloreScreen()),
+      );
+    },
   ),
   _CultureItem(
     title: "Panit-an",
-    image: "assets/images/roxas_cathedral.jpg",
-    screen: const ComingSoonScreen(title: "Panit-an"),
+    image: "assets/images/panitan_festival.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PanitanFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Pilar",
+    image: "assets/images/ivisan_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PilarFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Pontevedra",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PontevedraFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "President Roxas",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PresRoxasFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Roxas City",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RoxasCityFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Sapian",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SapianFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Sigma",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SigmaFolkloreScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Tapaz",
+    image: "assets/images/ivisan_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TapazFolkloreScreen()),
+      );
+    },
   ),
 ];
-
-/* ================= COMING SOON SCREEN ================= */
-
-class ComingSoonScreen extends StatelessWidget {
-  final String title;
-
-  const ComingSoonScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.black54,
-          title: Text(title),
-        ),
-        body: const Center(
-          child: Text(
-            "Content coming soon 👀",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

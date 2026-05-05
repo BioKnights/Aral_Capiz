@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/mambusao/mambusao_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/mambusao/mambusao_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class MambusaoHistoryScreen extends StatelessWidget {
-  const MambusaoHistoryScreen({super.key});
+class MambusaoHistory extends StatelessWidget {
+  const MambusaoHistory({super.key});
 
   static const _items = [
     {
       "title": "Mambusao",
       "image": "assets/images/mambusao_municipality.jpg",
-      "screen": MambusaoMunicipalScreen(),
+      "screen": MambusaoOrigin(),
     },
   ];
 

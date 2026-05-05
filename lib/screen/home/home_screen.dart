@@ -71,177 +71,69 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Stack(
-            children: [
-              Positioned(
-                top: 20,
-                left: 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                // 🔝 TOP BAR
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ProfileScreen(),
-                              ),
-                            ).then((_) => setState(() {}));
+                    _buildProfileSection(),
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      onPressed: () {
+                        showGeneralDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierLabel: "Settings",
+                          barrierColor: Colors.black.withOpacity(0.4),
+                          transitionDuration: const Duration(milliseconds: 300),
+                          pageBuilder: (_, __, ___) {
+                            return const Center(child: SettingsPopup());
                           },
-                          child: CircleAvatar(
-                            radius: 22,
-                            backgroundColor: Colors.orange,
-                            child: Text(
-                              (UserSession.displayName != null &&
-                                      UserSession.displayName!.isNotEmpty)
-                                  ? UserSession.displayName![0].toUpperCase()
-                                  : "?",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        ValueListenableBuilder<int>(
-                          valueListenable: UserSession.xpNotifier,
-                          builder: (_, __, ___) {
-                            final level = UserSession.level;
-                            final currentXp = UserSession.xp;
-                            final nextLevelXp = UserSession.xpNeeded;
-                            final progress = currentXp / nextLevelXp;
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  UserSession.displayName ?? "Player",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                LevelBar(
-                                  level: level,
-                                  progress: progress,
-                                  currentXp: currentXp,
-                                  nextLevelXp: nextLevelXp,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DailyMissionsScreen(),
-                          ),
                         );
                       },
-                      child: Container(
-                        width: 190,
-                        height: 56,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 6,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.calendar_month, color: Colors.white),
-                            SizedBox(width: 10),
-                            Text(
-                              "Daily Missions",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
-              ),
 
-              Positioned(
-                top: 20,
-                right: 20,
-                child: IconButton(
-                  icon: const Icon(Icons.settings),
-                  color: Colors.white,
-                  iconSize: 28,
-                  onPressed: () {
-                    showGeneralDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: "Settings",
-                      barrierColor: Colors.black.withOpacity(0.4),
-                      transitionDuration: const Duration(milliseconds: 300),
-                      pageBuilder: (_, __, ___) {
-                        return const Center(child: SettingsPopup());
-                      },
-                    );
-                  },
+                const SizedBox(height: 12),
+
+                // 🎯 DAILY + SLIDESHOW (FIXED + RESPONSIVE)
+                Row(
+                  children: [
+                    _buildDailyMissionButton(), // fixed
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: PlaceSlideshow(), // responsive
+                    ),
+                  ],
                 ),
-              ),
 
-              // 🔥 LANDSCAPE SLIDESHOW
-              const Positioned(
-                right: 20,
-                top: 140,
-                child: PlaceSlideshow(),
-              ),
+                const SizedBox(height: 20),
 
-              Positioned(
-                left: 12,
-                bottom: 110,
-                child: ChatPanel(),
-              ),
-
-              Center(
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.45,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final mascotSize = constraints.maxWidth * 0.70;
-                      return Center(
-                        child: SizedBox(
-                          width: mascotSize.clamp(320, 520),
-                          child: const MascotWidget(),
-                        ),
-                      );
-                    },
+                // 🦀 MASCOT
+                Expanded(
+                  child: Center(
+                    child: FractionallySizedBox(
+                      widthFactor: 0.7,
+                      child: const MascotWidget(),
+                    ),
                   ),
                 ),
-              ),
 
-              Positioned(
-                bottom: 28,
-                left: 0,
-                right: 0,
-                child: Row(
+                // 💬 CHAT
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ChatPanel(),
+                ),
+
+                const SizedBox(height: 10),
+
+                // 🔻 BOTTOM NAV
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     HoverIconButton(
@@ -279,8 +171,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= PROFILE =================
+  Widget _buildProfileSection() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProfileScreen(),
+          ),
+        ).then((_) => setState(() {}));
+      },
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.orange,
+            child: Text(
+              (UserSession.displayName?.isNotEmpty ?? false)
+                  ? UserSession.displayName![0].toUpperCase()
+                  : "?",
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                UserSession.displayName ?? "Player",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              LevelBar(
+                level: UserSession.level,
+                progress: UserSession.xp / UserSession.xpNeeded,
+                currentXp: UserSession.xp,
+                nextLevelXp: UserSession.xpNeeded,
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= DAILY =================
+  Widget _buildDailyMissionButton() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DailyMissionsScreen(),
+          ),
+        );
+      },
+      child: Container(
+        width: 150, // 🔥 FIXED WIDTH
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.orange,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Text(
+            "Daily Missions",
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ),
@@ -339,8 +308,7 @@ class _PlaceSlideshowState extends State<PlaceSlideshow> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200, // 🔥 LANDSCAPE
-      height: 120, // 🔥 LANDSCAPE
+      height: 80, // 🔥 responsive na (no width)
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
@@ -353,27 +321,9 @@ class _PlaceSlideshowState extends State<PlaceSlideshow> {
           controller: _controller,
           itemCount: images.length,
           itemBuilder: (_, index) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  images[index],
-                  fit: BoxFit.cover,
-                ),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  padding: const EdgeInsets.all(4),
-                  color: Colors.black.withOpacity(0.4),
-                  child: Text(
-                    "Place ${index + 1}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11,
-                    ),
-                  ),
-                )
-              ],
+            return Image.asset(
+              images[index],
+              fit: BoxFit.cover,
             );
           },
         ),

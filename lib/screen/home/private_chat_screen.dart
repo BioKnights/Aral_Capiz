@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD NI
 
 class PrivateChatScreen extends StatefulWidget {
   final String otherUid;
@@ -32,6 +33,22 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
   @override
   Widget build(BuildContext context) {
 
+    // 🖥️ DESKTOP MODE (NO FIREBASE)
+    if (PlatformHelper.isDesktop) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.otherName),
+        ),
+        body: const Center(
+          child: Text(
+            "Private chat not available on desktop 💻",
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    // ✅ ORIGINAL CODE (WALA GIN BAG-O)
     if (UserSession.userId == null || UserSession.userId!.isEmpty) {
       return const Scaffold(
         body: Center(child: Text("Login required")),
@@ -92,7 +109,6 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
 
                   final rawMessages = snapshot.data!.docs;
 
-                  // ✅ FILTER + SORT (PERMANENT FIX)
                   final messages = rawMessages.where((msg) {
                     final data = msg.data() as Map<String, dynamic>? ?? {};
                     return data['timestamp'] != null;

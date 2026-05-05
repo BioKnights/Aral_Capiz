@@ -1,36 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:language_game/screen/codex/folklore/potevedra/pontevedra_folklore.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
+import 'package:language_game/screen/codex/folklore/pontevedra/pontevedra_folklore.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class Pontevedra extends StatelessWidget {
-  const Pontevedra({super.key});
+class PontevedraFolkloreScreen extends StatelessWidget {
+  const PontevedraFolkloreScreen({super.key});
 
   static const _items = [
     {
-      "title": "Metropolitan Cathedral",
-      "image": "assets/images/roxas_cathedral.jpg",
-      "screen": PontevedraFolklore(),
-    },
-    {
-      "title": "Roxas City Museum",
-      "image": "assets/images/roxas_city_museum.jpg",
-      "screen": PontevedraFolklore(),
-    },
-    {
-      "title": "Palina Greenbelt Ecopark",
-      "image": "assets/images/palina.jpg",
-      "screen": PontevedraFolklore(),
-    },
-    {
-      "title": "The Ruins of Alcatraz",
-      "image": "assets/images/ruin.jpg",
-      "screen": PontevedraFolklore(),
-    },
-    {
-      "title": "Sacred Heart of Jesus Shrine",
-      "image": "assets/images/jesus.jpg",
-      "screen": PontevedraFolklore(),
+      "title": "Adlaw kag Bulan",
+      "image": "assets/images/pontevedra_municipal_hall.jpg",
+      "screen": AdlawKagBulanScreen(),
     },
   ];
 
@@ -49,7 +29,7 @@ class Pontevedra extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Roxas City"),
+          title: const Text("Pontevedra Folklore"),
           centerTitle: true,
         ),
         body: GridView.builder(
@@ -68,12 +48,13 @@ class Pontevedra extends StatelessWidget {
               title: item["title"] as String,
               imagePath: item["image"] as String,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => item["screen"] as Widget,
-                  ),
-                );
+                final screen = item["screen"];
+                if (screen != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => screen as Widget),
+                  );
+                }
               },
             );
           },

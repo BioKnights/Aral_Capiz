@@ -5,6 +5,7 @@ import 'package:language_game/services/auth_service.dart';
 import 'package:language_game/services/achievement_service.dart'; // 🔥 ADD THIS
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD THIS
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,18 +40,24 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      final firebaseUser = FirebaseAuth.instance.currentUser;
 
-      if (firebaseUser != null) {
-        UserSession.userId = firebaseUser.uid;
+      if (!PlatformHelper.isDesktop) { // ✅ FIX
+        final firebaseUser = FirebaseAuth.instance.currentUser;
 
-        await UserSession.loadFromFirebase();
+        if (firebaseUser != null) {
+          UserSession.userId = firebaseUser.uid;
 
-        // 🔥 LOAD ACHIEVEMENTS HERE
-        await AchievementService.load();
+          await UserSession.loadFromFirebase();
+
+          // 🔥 LOAD ACHIEVEMENTS HERE
+          await AchievementService.load();
+        }
+
+        await UserSession.syncToFirebase();
+      } else {
+        // 💻 DESKTOP SAFE MODE
+        UserSession.userId = "desktop_user";
       }
-
-      await UserSession.syncToFirebase();
 
       if (!mounted) return;
 
@@ -65,22 +72,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ================= GOOGLE LOGIN =================
   Future<void> _googleLogin() async {
-    final success = await AuthService.signInWithGoogle();
 
-    if (!mounted) return;
+    if (!PlatformHelper.isDesktop) { // ✅ FIX
+      final success = await AuthService.signInWithGoogle();
 
-    if (success) {
-      final user = FirebaseAuth.instance.currentUser;
+      if (!mounted) return;
 
-      if (user != null) {
-        UserSession.userId = user.uid;
+      if (success) {
+        final user = FirebaseAuth.instance.currentUser;
 
-        await UserSession.loadFromFirebase();
+        if (user != null) {
+          UserSession.userId = user.uid;
 
-        // 🔥 LOAD ACHIEVEMENTS HERE
-        await AchievementService.load();
+          await UserSession.loadFromFirebase();
+
+          // 🔥 LOAD ACHIEVEMENTS HERE
+          await AchievementService.load();
+        }
+
+        Navigator.pushReplacementNamed(context, '/home');
       }
-
+    } else {
+      // 💻 DESKTOP SAFE MODE
+      UserSession.userId = "desktop_google";
       Navigator.pushReplacementNamed(context, '/home');
     }
   }

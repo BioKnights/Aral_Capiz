@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:language_game/services/music_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD THIS
 
 class SettingsPopup extends StatefulWidget {
   const SettingsPopup({super.key});
@@ -118,7 +119,10 @@ class _SettingsPopupState extends State<SettingsPopup>
                                   ElevatedButton(
                                     onPressed: () async {
 
-                                      await FirebaseAuth.instance.signOut();
+                                      // ✅ FIX: block Firebase on desktop
+                                      if (!PlatformHelper.isDesktop) {
+                                        await FirebaseAuth.instance.signOut();
+                                      }
 
                                       Navigator.pop(context);
                                       Navigator.pop(context);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD THIS
 
 class FriendRequestsScreen extends StatelessWidget {
   final db = FirebaseFirestore.instance;
@@ -10,6 +11,22 @@ class FriendRequestsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    /// 🖥️ DESKTOP MODE (NO FIREBASE)
+    if (PlatformHelper.isDesktop) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Friend Requests"),
+        ),
+        body: const Center(
+          child: Text(
+            "Friend system not available on desktop 💻",
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    /// ❗ LOGIN CHECK
     if (UserSession.userId == null || UserSession.userId!.isEmpty) {
       return const Scaffold(
         body: Center(
@@ -116,7 +133,7 @@ class FriendRequestsScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
 
-                            // ✅ ACCEPT
+                            /// ✅ ACCEPT
                             IconButton(
                               icon: const Icon(Icons.check,
                                   color: Colors.green),
@@ -147,7 +164,7 @@ class FriendRequestsScreen extends StatelessWidget {
                               },
                             ),
 
-                            // ❌ REJECT
+                            /// ❌ REJECT
                             IconButton(
                               icon: const Icon(Icons.close,
                                   color: Colors.red),

@@ -29,7 +29,7 @@ class DumaraoTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Patawan Falls"),
+          title: const Text("Dumarao"),
           centerTitle: true,
         ),
         body: GridView.builder(

@@ -10,23 +10,26 @@ import 'firebase_options.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:io';
 import 'package:language_game/services/user_session.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 🔥 ADD THIS
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:language_game/services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 INIT ADS
+  // 🔥 INIT ADS (mobile only)
   if (Platform.isAndroid || Platform.isIOS) {
     await MobileAds.instance.initialize();
   }
 
   // 🔥 INIT FIREBASE
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // 🔥 FORCE LOGOUT (FIX AUTO LOGIN)
-  await FirebaseAuth.instance.signOut();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("✅ Firebase initialized");
+  } catch (e) {
+    print("🔥 Firebase init error: $e");
+  }
 
   // 🔥 LOAD LOCAL SESSION
   await UserSession.load();
@@ -37,12 +40,16 @@ void main() async {
   ]);
 
   // 🔥 INIT MUSIC
-  await MusicService.init();
+  try {
+    await MusicService.init();
+  } catch (e) {
+    print("Music init error: $e");
+  }
 
   runApp(const MyApp());
 }
 
-// 🔥 NOW STATEFUL (for lifecycle control)
+// 🔥 APP ROOT
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -51,15 +58,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // 🔥 ENSURE MUSIC START ONLY ONCE
-    if (!MusicService.isPlaying) {
-      MusicService.start();
+    try {
+      if (!MusicService.isPlaying) {
+        MusicService.start();
+      }
+    } catch (e) {
+      print("Music start error: $e");
     }
   }
 
@@ -69,13 +78,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // 🔥 APP LIFECYCLE CONTROL
+  // 🔥 MUSIC CONTROL
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      MusicService.pause(); // 🔇 minimize
-    } else if (state == AppLifecycleState.resumed) {
-      MusicService.resume(); // 🔊 balik open
+    try {
+      if (state == AppLifecycleState.paused) {
+        MusicService.pause();
+      } else if (state == AppLifecycleState.resumed) {
+        MusicService.resume();
+      }
+    } catch (e) {
+      print("Lifecycle music error: $e");
     }
   }
 
@@ -88,8 +101,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         scaffoldBackgroundColor: Colors.transparent,
       ),
 
-      // 🔥 START WITH SPLASH
-      home: const SplashScreen(),
+      // 🔥 AUTH STREAM (USING AUTH SERVICE)
+      home: StreamBuilder<User?>(
+        stream: AuthService.authStateChanges,
+        builder: (context, snapshot) {
+          // ⏳ LOADING
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen();
+          }
+
+          // ✅ LOGGED IN
+          if (snapshot.hasData) {
+            return const HomeScreen();
+          }
+
+          // ❌ NOT LOGGED IN
+          return const LoginScreen();
+        },
+      ),
 
       routes: {
         '/login': (_) => const LoginScreen(),

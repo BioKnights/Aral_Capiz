@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/maayon/restoration_of_maayon.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/maayon/maayon_municipal.dart';
+
 import 'package:language_game/services/animated_background.dart';
 
-class MaayonCultureScreen extends StatelessWidget {
-  const MaayonCultureScreen({super.key});
+class MaayonHistory extends StatelessWidget {
+  const MaayonHistory({super.key});
 
   static const _items = [
     {
       "title": "Maayon",
       "image": "assets/images/maayon_municipal_hall.jpg",
-      "screen": MaayonMunicipalScreen(),
+      "screen": RestorationOfMaayon(),
     },
   ];
 

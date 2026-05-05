@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/dumarao/dumarao_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/dumarao/dumarao_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class DaoHistoryScreen extends StatelessWidget {
-  const DaoHistoryScreen({super.key});
+class DumaraoHistory extends StatelessWidget {
+  const DumaraoHistory({super.key});
 
   static const _items = [
     {
       "title": "Dumarao",
       "image": "assets/images/dumarao_municipality.jpg",
-      "screen": DumaraoMunicipalScreen(),
+      "screen": DumaraoOrigin(),
     },
   ];
 

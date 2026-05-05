@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:language_game/screen/codex/tourist_spots/ivisan/ivisan.dart';
-
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
+import 'package:language_game/screen/codex/tourist_spots/cuartero/cuartero_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/dao/dao_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/dumalag/dumalag_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/dumarao/dumarao_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/ivisan/ivisan_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/jamindan/jamindan_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/mambusao/mambusao_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/pilar/pilar_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/pontevedra/pontevedra_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/president_roxas/president_roxas_tourist_spots.dart';
 import 'package:language_game/screen/codex/tourist_spots/roxas_city/roxas_city_screen.dart';
+import 'package:language_game/screen/codex/tourist_spots/sapian/sapian_tourist_spots.dart';
+import 'package:language_game/screen/codex/tourist_spots/sigma/sigma_tourist_spots.dart';
 import 'package:language_game/services/animated_background.dart';
 
 class TouristSpotScreen extends StatelessWidget {
@@ -12,19 +22,16 @@ class TouristSpotScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // 🔥 RESPONSIVE COLUMN COUNT
     int crossAxisCount = 2;
     if (size.width > 900) {
-      crossAxisCount = 4; // desktop / large tablet
+      crossAxisCount = 4;
     } else if (size.width > 600) {
-      crossAxisCount = 3; // tablet
+      crossAxisCount = 3;
     }
 
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-
-        // 🔙 BACK BUTTON + TITLE
         appBar: AppBar(
           backgroundColor: Colors.black54,
           leading: IconButton(
@@ -34,7 +41,6 @@ class TouristSpotScreen extends StatelessWidget {
           title: const Text("Tourist Spots"),
           centerTitle: true,
         ),
-
         body: SafeArea(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
@@ -79,35 +85,133 @@ class _CultureItem {
 
 final List<_CultureItem> _cultureItems = [
   _CultureItem(
+    title: "Cuartero",
+    image: "assets/images/municipal_hall(cuartero).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CuarteroTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Dao",
+    image: "assets/images/dao_municipality_(dao).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DaoTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Dumalag",
+    image: "assets/images/dumalag_history.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DumalagTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Dumarao",
+    image: "assets/images/dumarao_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DumaraoTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Ivisan",
+    image: "assets/images/ivisan_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const IvisanTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Jamindan",
+    image: "assets/images/jamindan.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const JamindanTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Mambusao",
+    image: "assets/images/mambusao_municipality.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MambusaoTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Pilar",
+    image: "assets/images/agtalin_shrine_(pilar).jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PilarTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Pontevedra",
+    image: "assets/images/pontevedra_municipal_hall.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PontevedraTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "President Roxas",
+    image: "assets/images/president_roxas_municipal.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PresidentRoxasTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
     title: "Roxas City",
     image: "assets/images/roxas_city.jpg",
     onTap: (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const RoxasCityScreen()),
+        MaterialPageRoute(builder: (_) => const RoxasCityTSScreen()),
+      );
+    },
+  ),
+  _CultureItem(
+    title: "Sapian",
+    image: "assets/images/sapian_municipal_hall.jpg",
+    onTap: (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SapianTSScreen()),
       );
     },
   ),
   _CultureItem(
     title: "Sigma",
     image: "assets/images/sigma.jpg",
-  ),
-  _CultureItem(
-    title: "Ivisan",
-    image: "assets/images/roxas_cathedral.jpg",
     onTap: (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const Ivisan()),
+        MaterialPageRoute(builder: (_) => const SigmaTSScreen()),
       );
     },
-  ),
-  _CultureItem(
-    title: "Pontevedra",
-    image: "assets/images/roxas_cathedral.jpg",
-  ),
-  _CultureItem(
-    title: "Panit-an",
-    image: "assets/images/roxas_cathedral.jpg",
   ),
 ];

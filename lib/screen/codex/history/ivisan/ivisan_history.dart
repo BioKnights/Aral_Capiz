@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/ivisan/ivisan_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/ivisan/ivisan_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class IvisanHistoryScreen extends StatelessWidget {
-  const IvisanHistoryScreen({super.key});
+class IvisanHistory extends StatelessWidget {
+  const IvisanHistory({super.key});
 
   static const _items = [
     {
       "title": "Ivisan",
       "image": "assets/images/ivisan_municipality.jpg",
-      "screen": IvisanMunicipalScreen(),
+      "screen": IvisanOrigin(),
     },
   ];
 

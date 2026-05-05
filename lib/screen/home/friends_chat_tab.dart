@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD THIS
 import 'private_chat_screen.dart';
 
 class FriendsChatTab extends StatelessWidget {
@@ -11,6 +12,50 @@ class FriendsChatTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    /// 🖥️ DESKTOP MODE (NO FIREBASE)
+    if (PlatformHelper.isDesktop) {
+      final dummyFriends = [
+        {"uid": "1", "name": "Jenny", "online": true},
+        {"uid": "2", "name": "Mark Romel", "online": false},
+        {"uid": "3", "name": "Dave Andree Abay", "online": true},
+      ];
+
+      return ListView(
+        children: dummyFriends.map((user) {
+          final name = user["name"] as String;
+          final isOnline = user["online"] as bool;
+
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.orange,
+              child: Text(name[0]),
+            ),
+            title: Text(
+              name,
+              style: const TextStyle(color: Colors.white),
+            ),
+            subtitle: Text(
+              isOnline ? "Online" : "Offline",
+              style: TextStyle(
+                color: isOnline ? Colors.green : Colors.grey,
+              ),
+            ),
+            trailing: Icon(
+              Icons.circle,
+              size: 10,
+              color: isOnline ? Colors.green : Colors.grey,
+            ),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Chat not available on desktop 💻")),
+              );
+            },
+          );
+        }).toList(),
+      );
+    }
+
+    /// ❗ LOGIN CHECK
     if (UserSession.userId == null || UserSession.userId!.isEmpty) {
       return const Center(
         child: Text("Login required", style: TextStyle(color: Colors.white)),
@@ -35,7 +80,6 @@ class FriendsChatTab extends StatelessWidget {
           );
         }
 
-        // ✅ FILTER EMPTY UID
         final List<String> friends =
             List<String>.from(data['friends'] ?? [])
                 .where((uid) => uid.toString().isNotEmpty)
@@ -50,7 +94,6 @@ class FriendsChatTab extends StatelessWidget {
         return ListView(
           children: friends.map<Widget>((uid) {
 
-            // ✅ EXTRA SAFETY
             if (uid.isEmpty) return const SizedBox();
 
             return FutureBuilder<DocumentSnapshot>(

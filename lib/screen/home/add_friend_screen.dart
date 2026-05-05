@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD THIS
 
 class AddFriendScreen extends StatefulWidget {
   const AddFriendScreen({super.key});
@@ -15,6 +16,50 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
   @override
   Widget build(BuildContext context) {
 
+    /// 🖥️ DESKTOP MODE (NO FIREBASE)
+    if (PlatformHelper.isDesktop) {
+      final dummyUsers = [
+        {"name": "Jenny", "online": true},
+        {"name": "Dave Andree Abay", "online": false},
+        {"name": "Mark Romel", "online": true},
+      ];
+
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Add Friends"),
+        ),
+        body: ListView.builder(
+          itemCount: dummyUsers.length,
+          itemBuilder: (context, index) {
+            final user = dummyUsers[index];
+            final name = user["name"] as String;
+            final isOnline = user["online"] as bool;
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.orange,
+                  child: Text(name[0]),
+                ),
+                title: Text(name),
+                subtitle: Text(isOnline ? "Online" : "Offline"),
+                trailing: ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Sent request to $name (demo)")),
+                    );
+                  },
+                  child: const Text("Add"),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    /// ❗ LOGIN CHECK
     if (UserSession.userId == null || UserSession.userId!.isEmpty) {
       return const Scaffold(
         body: Center(child: Text("Login required")),

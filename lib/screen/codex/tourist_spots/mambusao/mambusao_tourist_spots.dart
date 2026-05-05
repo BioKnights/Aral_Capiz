@@ -29,7 +29,7 @@ class MambusaoTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Mambusao Quipot Cave"),
+          title: const Text("Mambusao"),
           centerTitle: true,
         ),
         body: GridView.builder(

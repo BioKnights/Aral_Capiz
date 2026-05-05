@@ -29,7 +29,7 @@ class IvisanTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Ayagao Beach Ivisan"),
+          title: const Text("Ivisan"),
           centerTitle: true,
         ),
         body: GridView.builder(

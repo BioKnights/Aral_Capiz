@@ -29,7 +29,7 @@ class CuarteroTSScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Cuartero Nagba Eco-Park"),
+          title: const Text("Cuartero"),
           centerTitle: true,
         ),
         body: GridView.builder(

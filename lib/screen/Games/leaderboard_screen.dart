@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/firebase_leaderboard_service.dart';
 import 'package:language_game/services/animated_background.dart';
+import 'package:language_game/utils/platform_helper.dart';
 
 class LeaderboardScreen extends StatelessWidget {
   const LeaderboardScreen({super.key});
 
   static const boards = [
-    ("    Casual Ranking", "casual_leaderboard"),
+    ("    True or False Ranking", "truefalse_leaderboard"),
     ("    Matching Game Ranking", "matching_leaderboard"),
     ("    Fill In The Blank", "fill_blank_leaderboard"),
-    ("    Guess The Language", "guess_language_leaderboard")
+    ("    Guess The Language", "guess_language_leaderboard"),
+    ("    Guess The Image", "guess_image_leaderboard"),
   ];
 
   @override
@@ -59,30 +61,71 @@ class LeaderboardScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
-        /// 🔥 FIREBASE LIVE STREAM
-        StreamBuilder<QuerySnapshot>(
-          stream: FirebaseLeaderboardService.getScores(boardKey),
+        FutureBuilder<dynamic>(
+          future: PlatformHelper.isDesktop
+              ? Future.value(<Map<String, dynamic>>[
+                  {"username": "Jenny", "score": 120},
+                  {"username": "Dave Andree Abay", "score": 100},
+                  {"username": "Mark Romel", "score": 80},
+                ])
+              : FirebaseLeaderboardService.getScores(boardKey),
+
           builder: (context, snapshot) {
 
+            // ⏳ LOADING
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            // ❌ ERROR
+            if (snapshot.hasError) {
+              return const Text(
+                "Error loading leaderboard",
+                style: TextStyle(color: Colors.red),
+              );
+            }
+
+            // 📭 EMPTY
+            if (!snapshot.hasData) {
               return const Text(
                 "No scores yet",
                 style: TextStyle(color: Colors.white70),
               );
             }
 
-            final docs = snapshot.data!.docs;
+            final data = snapshot.data;
+            List<Map<String, dynamic>> list = [];
+
+            // 💻 DESKTOP
+            if (PlatformHelper.isDesktop) {
+              list = (data as List)
+                  .map((e) => Map<String, dynamic>.from(e))
+                  .toList();
+            }
+            // 📱 MOBILE (FIREBASE)
+            else {
+              final docs = (data as QuerySnapshot).docs;
+
+              list = docs.map((e) {
+                final raw = e.data();
+                if (raw is Map<String, dynamic>) return raw;
+                return <String, dynamic>{};
+              }).toList();
+            }
+
+            if (list.isEmpty) {
+              return const Text(
+                "No scores yet",
+                style: TextStyle(color: Colors.white70),
+              );
+            }
 
             return Column(
-              children: docs.asMap().entries.map((e) {
-                final data = e.value;
+              children: list.asMap().entries.map((e) {
+                final item = e.value;
 
-                final username = data["username"];
-                final score = data["score"];
+                final username = item["username"]?.toString() ?? "Unknown";
+                final score = item["score"] ?? 0;
 
                 return Card(
                   color: Colors.black54,

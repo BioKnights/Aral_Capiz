@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/cuartero/cuartero_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/cuartero/cuartero_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class CuarteroHistoryScreen extends StatelessWidget {
-  const CuarteroHistoryScreen({super.key});
+class Cuarterohistory extends StatelessWidget {
+  const Cuarterohistory({super.key});
 
   static const _items = [
     {
-      "title": "Cuartero",
-      "image": "assets/images/municipal_hall(cuartero).jpg",
-      "screen": CuarteroMunicipalScreen(),
+      "title": "Cuartero Origin",
+      "image": "assets/images/Cuartero_history.jpg",
+      "screen": CuarteroOrigin(),
     },
   ];
 
@@ -29,7 +29,7 @@ class CuarteroHistoryScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Cuartero"),
+          title: const Text("Cuartero History"),
           centerTitle: true,
         ),
         body: GridView.builder(

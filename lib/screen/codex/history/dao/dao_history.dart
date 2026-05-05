@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/dao/dao_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/dao/dao_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
-class DaoHistoryScreen extends StatelessWidget {
-  const DaoHistoryScreen({super.key});
+class DaoHistory extends StatelessWidget {
+  const DaoHistory({super.key});
 
   static const _items = [
     {
       "title": "Dao",
       "image": "assets/images/dao_municipality_(dao).jpg",
-      "screen": DaoMunicipalScreen(),
+      "screen": DaoOrigin(),
     },
   ];
 

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserSession {
   // ================= FIREBASE =================
-  static String? userId; // 🔥 SET THIS AFTER LOGIN
+  static String? userId;
   static final _db = FirebaseFirestore.instance;
 
   // ================= SESSION =================
@@ -12,6 +12,9 @@ class UserSession {
   static String? displayName;
   static String gender = "male";
   static String avatar = "default";
+
+  // ✅ FIX: alias for compatibility (no more error)
+  static String get username => displayName ?? "Player";
 
   static bool get isLoggedIn =>
       !isGuest && displayName != null && displayName!.isNotEmpty;
@@ -22,8 +25,8 @@ class UserSession {
   static int gamesPlayed = 0;
   static int totalScore = 0;
 
-  static final ValueNotifier<int> xpNotifier = ValueNotifier<int>(0);
-  static final ValueNotifier<int> levelNotifier = ValueNotifier<int>(1);
+  static final ValueNotifier<int> xpNotifier = ValueNotifier(0);
+  static final ValueNotifier<int> levelNotifier = ValueNotifier(1);
 
   static int get xpNeeded => level * 100;
 
@@ -32,9 +35,9 @@ class UserSession {
     if (userId == null) return;
 
     await _db.collection('users').doc(userId).set({
-      'name': displayName,
+      'name': displayName ?? "Player",
       'gender': gender,
-      'avatar': avatar, // 🔥 ADDED
+      'avatar': avatar,
       'level': level,
       'xp': xp,
       'gamesPlayed': gamesPlayed,
@@ -53,7 +56,7 @@ class UserSession {
 
       displayName = data['name'] ?? "Player";
       gender = data['gender'] ?? "male";
-      avatar = data['avatar'] ?? "default"; // 🔥 ADDED
+      avatar = data['avatar'] ?? "default";
 
       level = data['level'] ?? 1;
       xp = data['xp'] ?? 0;
@@ -67,34 +70,37 @@ class UserSession {
     }
   }
 
-  // ================= LOGIN TYPES =================
+  // ================= LOGIN =================
   static void loginLocal(String name) {
     isGuest = false;
     displayName = name;
+
     save();
-    syncToFirebase(); // 🔥 AUTO SAVE
+    syncToFirebase();
   }
 
   static void guest() {
     isGuest = true;
     displayName = "Guest";
+
     save();
   }
 
   static void logout() {
     isGuest = true;
     displayName = null;
+
     save();
   }
 
-  // ================= SAVE / LOAD LOCAL =================
+  // ================= LOCAL SAVE =================
   static Future<void> load() async {
     final p = await SharedPreferences.getInstance();
 
     isGuest = p.getBool('guest') ?? true;
     displayName = p.getString('name');
     gender = p.getString('gender') ?? "male";
-    avatar = p.getString('avatar') ?? "default"; // 🔥 ADDED
+    avatar = p.getString('avatar') ?? "default";
 
     level = p.getInt('level') ?? 1;
     xp = p.getInt('xp') ?? 0;
@@ -111,7 +117,7 @@ class UserSession {
     await p.setBool('guest', isGuest);
     await p.setString('name', displayName ?? "");
     await p.setString('gender', gender);
-    await p.setString('avatar', avatar); // 🔥 ADDED
+    await p.setString('avatar', avatar);
 
     await p.setInt('level', level);
     await p.setInt('xp', xp);
@@ -120,7 +126,8 @@ class UserSession {
   }
 
   // ================= PROFILE =================
-  static bool get hasProfile => displayName != null && displayName!.isNotEmpty;
+  static bool get hasProfile =>
+      displayName != null && displayName!.isNotEmpty;
 
   static void setProfileName(String name) {
     displayName = name;
@@ -134,14 +141,13 @@ class UserSession {
     syncToFirebase();
   }
 
-  // 🔥 NEW: SET AVATAR
   static void setAvatar(String a) {
     avatar = a;
     save();
     syncToFirebase();
   }
 
-  // ================= XP + LEVEL =================
+  // ================= XP SYSTEM =================
   static void addXp(int amount) {
     xp += amount;
 
@@ -169,10 +175,9 @@ class UserSession {
 
   static void unlockNextChapter() {
     unlockedChapter++;
-    debugPrint("Unlocked Chapter $unlockedChapter");
   }
 
-  // ================= DAILY =================
+  // ================= DAILY TRACKING =================
   static int gamesPlayedToday = 0;
   static int todayScore = 0;
 

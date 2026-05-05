@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:language_game/utils/platform_helper.dart';
 import '../widgets/achievement_popup.dart';
 
 /// =======================
@@ -34,10 +35,17 @@ class AchievementService {
 
   static final ValueNotifier<int> notifier = ValueNotifier(0);
 
-  /// 🔥 USER ID (UNIFIED)
-  static String? get userId => FirebaseAuth.instance.currentUser?.uid;
+  /// =======================
+  /// USER ID
+  /// =======================
+  static String? get userId {
+    if (PlatformHelper.isDesktop) return "desktop_user";
+    return FirebaseAuth.instance.currentUser?.uid;
+  }
 
-  /// 🔑 ALL ACHIEVEMENTS
+  /// =======================
+  /// ACHIEVEMENTS LIST
+  /// =======================
   static final List<Achievement> allAchievements = [
     Achievement(
       id: "tf_first_answer",
@@ -103,12 +111,49 @@ class AchievementService {
       category: "guess",
       rarity: "common",
     ),
+
+    // 🔥 NEW GUESS GAME ACHIEVEMENTS
+    Achievement(
+      id: "guess_5",
+      title: "Starter Guesser",
+      description: "Score 5 in Guess Game",
+      icon: "🎯",
+      category: "guess",
+      rarity: "rare",
+    ),
+    Achievement(
+      id: "guess_10",
+      title: "Sharp Mind",
+      description: "Score 10 in Guess Game",
+      icon: "🔥",
+      category: "guess",
+      rarity: "epic",
+    ),
+    Achievement(
+      id: "guess_master",
+      title: "Guess Master",
+      description: "Score 20 in Guess Game",
+      icon: "👑",
+      category: "guess",
+      rarity: "legendary",
+    ),
   ];
 
   /// =======================
-  /// LOAD FROM FIREBASE
+  /// LOAD
   /// =======================
   static Future<void> load() async {
+    if (PlatformHelper.isDesktop) {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList("achievements") ?? [];
+      _unlocked
+        ..clear()
+        ..addAll(list);
+
+      notifier.value++;
+      return;
+    }
+
     if (userId == null) return;
 
     final doc = await FirebaseFirestore.instance
@@ -120,38 +165,33 @@ class AchievementService {
 
     if (doc.exists) {
       final data = doc.data()!;
-
       final list = List<String>.from(data["achievements"] ?? []);
       _unlocked.addAll(list);
-
       _exp = data["achievement_exp"] ?? 0;
     }
-
-    /// 🔁 optional local cache
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList("achievements", _unlocked.toList());
 
     notifier.value++;
   }
 
   /// =======================
-  /// SAVE TO FIREBASE
+  /// SAVE
   /// =======================
   static Future<void> _save() async {
+    if (PlatformHelper.isDesktop) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList("achievements", _unlocked.toList());
+      return;
+    }
+
     if (userId == null) return;
 
-    final doc = FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection('users')
-        .doc(userId);
-
-    await doc.set({
+        .doc(userId)
+        .set({
       "achievements": _unlocked.toList(),
       "achievement_exp": _exp,
     }, SetOptions(merge: true));
-
-    /// 🔁 optional local cache
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList("achievements", _unlocked.toList());
   }
 
   /// =======================
@@ -161,7 +201,6 @@ class AchievementService {
     if (_unlocked.contains(id)) return;
 
     _unlocked.add(id);
-
     await _save();
     notifier.value++;
 
@@ -170,18 +209,9 @@ class AchievementService {
       orElse: () => allAchievements.first,
     );
 
-    debugPrint("🏆 Achievement unlocked: $id");
-    debugPrint("🔥 Saved to Firebase: ${_unlocked.toList()}");
-
-    showPopup(
-      context,
-      text: "🏆 ${a.title} (${a.rarity.toUpperCase()})",
-    );
+    showPopup(context, text: "🏆 ${a.title}");
   }
 
-  /// =======================
-  /// POPUP
-  /// =======================
   static void showPopup(BuildContext context, {String? text}) {
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
@@ -205,23 +235,43 @@ class AchievementService {
   }
 
   /// =======================
-  /// EXP SYSTEM
+  /// 🔥 NEW: GUESS GAME CHECK
   /// =======================
+  static Future<void> checkGuessGame(int score) async {
+    await unlockByScore("language_scout", score);
+
+    if (score >= 5) {
+      await unlockByScore("guess_5", score);
+    }
+
+    if (score >= 10) {
+      await unlockByScore("guess_10", score);
+    }
+
+    if (score >= 20) {
+      await unlockByScore("guess_master", score);
+    }
+  }
+
+  /// =======================
+  /// 🔥 SCORE UNLOCK HELPER
+  /// =======================
+  static Future<void> unlockByScore(String id, int score) async {
+    if (_unlocked.contains(id)) return;
+
+    _unlocked.add(id);
+    await _save();
+    notifier.value++;
+  }
+
   static Future<void> addExp(int amount) async {
     _exp += amount;
     await _save();
-
-    debugPrint("📈 EXP +$amount | Total: $_exp");
   }
 
   static int get exp => _exp;
 
-  /// =======================
-  /// HELPERS
-  /// =======================
-  static bool isUnlocked(String id) {
-    return _unlocked.contains(id);
-  }
+  static bool isUnlocked(String id) => _unlocked.contains(id);
 
   static List<String> get unlockedList => _unlocked.toList();
 }

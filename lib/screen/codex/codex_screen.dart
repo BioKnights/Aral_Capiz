@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:language_game/screen/codex/folklore/folklore.dart';
-import 'package:language_game/screen/codex/history/history.dart';
+import 'package:language_game/screen/codex/history/history_screen.dart';
+import 'package:language_game/screen/codex/tourist_spots/tourist_spots.dart';
 import '../../services/animated_background.dart';
-import 'package:language_game/screen/codex/tourist_spots/tourist_spot_screen.dart';
-import 'package:language_game/screen/codex/culture&tradition/culture_screen.dart';
+import 'package:language_game/screen/codex/culture_and_tradition/culture_screen.dart';
 
 class CodexScreen extends StatelessWidget {
   const CodexScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -51,8 +50,8 @@ class CodexScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                           MaterialPageRoute(
-                            builder: (_) => History(),
+                          MaterialPageRoute(
+                            builder: (_) => HistoryScreen(),
                           ),
                         );
                         // TODO: history screen
@@ -79,12 +78,11 @@ class CodexScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => TouristSpotScreen(),
+                            builder: (_) => TouristSpots(),
                           ),
                         );
                       },
                     ),
-
                     _MenuCard(
                       icon: Icons.theater_comedy,
                       title: "Folklore",
@@ -93,7 +91,7 @@ class CodexScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => Folklore(),
+                            builder: (_) => FolkloreScreen(),
                           ),
                         );
                       },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:language_game/services/user_session.dart';
+import 'package:language_game/utils/platform_helper.dart'; // ✅ ADD LANG NI
 
 class MailScreen extends StatelessWidget {
   const MailScreen({super.key});
@@ -9,7 +10,21 @@ class MailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = FirebaseFirestore.instance;
 
-    // ✅ GUARD
+    // 🖥️ DESKTOP MODE (NO FIREBASE)
+    if (PlatformHelper.isDesktop) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Mail"),
+        ),
+        body: const Center(
+          child: Text(
+            "Mail system not available on desktop 💻",
+          ),
+        ),
+      );
+    }
+
+    // ✅ ORIGINAL CODE (WALA GIN BAG-O)
     if (UserSession.userId == null || UserSession.userId!.isEmpty) {
       return const Scaffold(
         body: Center(
@@ -32,8 +47,8 @@ class MailScreen extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF0F172A), // top dark blue
-              Color(0xFF020617), // bottom darker
+              Color(0xFF0F172A),
+              Color(0xFF020617),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

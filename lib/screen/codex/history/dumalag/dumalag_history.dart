@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:language_game/screen/codex/history/dumalag/dumalag_origin.dart';
 import 'package:language_game/widgets/tourist_spot_screen_card.dart';
-import 'package:language_game/screen/codex/history/dumalag/dumalag_municipal.dart';
 import 'package:language_game/services/animated_background.dart';
 
 class DumalagHistoryScreen extends StatelessWidget {
@@ -10,7 +10,7 @@ class DumalagHistoryScreen extends StatelessWidget {
     {
       "title": "Dumalag",
       "image": "assets/images/dumalag_history.jpg",
-      "screen": DumalagMunicipalScreen(),
+      "screen": DumalagOrigin(),
     },
   ];
 

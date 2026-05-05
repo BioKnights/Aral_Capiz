@@ -56,11 +56,11 @@ class CathedralScreen extends StatelessWidget {
                     border: Border.all(color: Colors.white24),
                   ),
                   child: const Text(
-                    "1701, Roxas City (formerly Capiz, Capiz)\n\n"
-                    "The Diocese of Capiz was erected through the Papal Bull of "
-                    "Pope Pius XII, Ex Supreme Apostolus, on May 28, 1951. "
-                    "It became a suffragan of the Archdiocese of Jaro.\n\n"
-                    "Most Rev. Manuel P. Yap, DD served as the first bishop.",
+                    "1701, Roxas City (formerly Capiz, Capiz)\n"
+                    "The Diocese of Capiz was erected through the Papal Bull of\n"
+                    "Pope Pius XII, Ex Supreme Apostolus, on May 28, 1951.\n"
+                    "It became a suffragan of the Archdiocese of Jaro.\n"
+                    "Most Rev. Manuel P. Yap, DD served as the first bishop.\n\n",
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.6,
